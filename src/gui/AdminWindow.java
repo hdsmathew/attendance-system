@@ -14,7 +14,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.awt.event.HierarchyBoundsAdapter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -26,6 +26,7 @@ import javax.swing.Box;
 import javax.swing.ButtonModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -74,6 +75,8 @@ public class AdminWindow extends JFrame {
 	public JButton btnCourse;
 	public JButton btnAttendance;
 	public JButton btnLogout;
+	
+	public GridBagConstraints gc;
 	
 	// Registry Components
 	public JPanel pnlAddRegistry;
@@ -328,76 +331,25 @@ public class AdminWindow extends JFrame {
 		btnAdd = new JButton("Add Registry");
 		btnAdd.setFont(ROBOTO_PLAIN_TITLE);
 		
-		GridBagConstraints gc = new GridBagConstraints();
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.gridheight = 1;
-		gc.weightx = 100.0;
-		gc.weighty = 100.0;
-		gc.insets = new Insets(5, 5, 5, 5);
-		gc.anchor = GridBagConstraints.EAST;
-		gc.fill = GridBagConstraints.NONE;
+		gc = new GridBagConstraints();
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		pnlAddRegistry.add(lblUserId, gc);
 		
-		gc.gridx = 0;
-		gc.gridy = 1;
-		pnlAddRegistry.add(lblName, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 2;
-		pnlAddRegistry.add(lblEmail, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 3;
-		pnlAddRegistry.add(lblPhone, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 4;
-		pnlAddRegistry.add(lblPassword, gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 0;
-		gc.gridwidth = 2;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlAddRegistry.add(jtfUserId, gc);
-		
-		gc.gridy = 1;
-		pnlAddRegistry.add(jtfName, gc);
-		
-		gc.gridy = 2;
-		pnlAddRegistry.add(jtfEmail, gc);
-
-		gc.gridy = 3;
-		pnlAddRegistry.add(jtfPhone, gc);
-		
-		gc.gridy = 4;
-		pnlAddRegistry.add(jtfPassword, gc);
-		
-		gc.gridx = 2;
-		gc.gridy = 1;
-		pnlAddRegistry.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridy = 2;
-		pnlAddRegistry.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridy = 3;
-		pnlAddRegistry.add(Box.createHorizontalGlue(), gc);
-
-		gc.gridy = 4;
-		pnlAddRegistry.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridy = 5;
-		pnlAddRegistry.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 1;
-		gc.gridwidth = 1;
-		gc.anchor = GridBagConstraints.NORTHWEST;
-		pnlAddRegistry.add(btnAdd, gc);
+		addGridBagComponent(pnlAddRegistry, lblUserId, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblName, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblEmail, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblPhone, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblPassword, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, jtfUserId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfName, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfEmail, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfPhone, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfPassword, 1, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 5, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, btnAdd, 1, 5, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
 		
 		pnlCardRegistry.add(scpRegistryList);
@@ -508,57 +460,20 @@ public class AdminWindow extends JFrame {
 		gc.anchor = GridBagConstraints.EAST;
 		gc.fill = GridBagConstraints.NONE;
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		pnlAddLecturer.add(lblLectId, gc);
 		
-		gc.gridx = 0;
-		gc.gridy = 1;
-		pnlAddLecturer.add(lblLectFname, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 2;
-		pnlAddLecturer.add(lblLectLname, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 3;
-		pnlAddLecturer.add(lblLectEmail, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 4;
-		pnlAddLecturer.add(lblLectPhone, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 5;
-		pnlAddLecturer.add(lblLectAddr, gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 0;
-		gc.gridwidth = 2;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlAddLecturer.add(jtfLectId, gc);
-		
-		gc.gridy = 1;
-		pnlAddLecturer.add(jtfLectFname, gc);
-		
-		gc.gridy = 2;
-		pnlAddLecturer.add(jtfLectLname, gc);
-		
-		gc.gridy = 3;
-		pnlAddLecturer.add(jtfLectEmail, gc);
-		
-		gc.gridy = 4;
-		pnlAddLecturer.add(jtfLectPhone, gc);
-		
-		gc.gridy = 5;
-		pnlAddLecturer.add(jtfLectAddr, gc);
-				
-		gc.gridx = 1;
-		gc.gridy = 6;
-		gc.gridwidth = 1;
-		gc.anchor = GridBagConstraints.NORTHWEST;
-		pnlAddLecturer.add(btnAddLect, gc);
+		addGridBagComponent(pnlAddLecturer, lblLectId, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectFname, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectLname, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectEmail, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectPhone, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectAddr, 0, 5, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, jtfLectId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectFname, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectLname, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectEmail, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectPhone, 1, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectAddr, 1, 5, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, btnAddLect, 1, 6, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
 		
 		pnlAssignLecturer = new JPanel(new GridBagLayout());
@@ -608,55 +523,19 @@ public class AdminWindow extends JFrame {
 		lblAssignModule = new JLabel("Module");
 		lblAssignModule.setFont(ROBOTO_PLAIN_TITLE);
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.gridheight = 1;
-		gc.weightx = 100.0;
-		gc.weighty = 100.0;
-		gc.insets = new Insets(5, 5, 5, 5);
-		gc.anchor = GridBagConstraints.EAST;
-		gc.fill = GridBagConstraints.NONE;
 		
-		pnlAssignLecturer.add(lblAssignLect, gc);
-		
-		gc.gridy = 1;
-		pnlAssignLecturer.add(lblAssignCourse, gc);
-		
-		gc.gridy = 2;
-		pnlAssignLecturer.add(lblAssignModule, gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 0;
-		gc.gridwidth = 2;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlAssignLecturer.add(jcbAssignLectNames, gc);
-		
-		gc.gridx = 2;
-		pnlAssignLecturer.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 1;
-		pnlAssignLecturer.add(jcbAssignCourseNames, gc);
-		
-		gc.gridx = 2;
-		pnlAssignLecturer.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 2;
-		pnlAssignLecturer.add(jcbAssignModuleNames, gc);
-		
-		gc.gridx = 2;
-		pnlAssignLecturer.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridy = 3;
-		pnlAssignLecturer.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 1;
-		gc.gridwidth = 1;
-		gc.anchor = GridBagConstraints.NORTHWEST;
-		pnlAssignLecturer.add(btnAssignLect, gc);
+		addGridBagComponent(pnlAssignLecturer, lblAssignLect, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAssignLecturer, lblAssignCourse, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAssignLecturer, lblAssignModule, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAssignLecturer, jcbAssignLectNames, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAssignLecturer, (JComponent) Box.createHorizontalGlue(), 2, 0);
+		addGridBagComponent(pnlAssignLecturer, jcbAssignCourseNames, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAssignLecturer, (JComponent) Box.createHorizontalGlue(), 2, 1);
+		addGridBagComponent(pnlAssignLecturer, jcbAssignModuleNames, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAssignLecturer, (JComponent) Box.createHorizontalGlue(), 2, 2);
+		addGridBagComponent(pnlAssignLecturer, (JComponent) Box.createHorizontalGlue(), 2, 3);
+		addGridBagComponent(pnlAssignLecturer, btnAssignLect, 1, 3, GridBagConstraints.NORTHEAST, GridBagConstraints.BOTH);
+
 
 		pnlManageLecturer = new JPanel(new GridLayout(1, 0, 5, 0));
 		pnlManageLecturer.add(pnlAddLecturer);
@@ -757,69 +636,21 @@ public class AdminWindow extends JFrame {
 		btnAddCourse = new JButton("Add Course");
 		btnAddCourse.setFont(ROBOTO_PLAIN_TITLE);
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.gridheight = 1;
-		gc.weightx = 100.0;
-		gc.weighty = 100.0;
-		gc.insets = new Insets(5, 5, 5, 5);
-		gc.anchor = GridBagConstraints.EAST;
-		gc.fill = GridBagConstraints.NONE;
 		
-		pnlAddCourse.add(lblCourseCode, gc);
-		
-		gc.gridy = 1;
-		pnlAddCourse.add(lblCourseName, gc);
-		
-		gc.gridx = 1;
-		gc.gridy = 0;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlAddCourse.add(jtfCourseCode, gc);
-		
-		gc.gridy = 1;
-		pnlAddCourse.add(jtfCourseName, gc);
-		
-		gc.gridx = 3;
-		gc.gridy = 0;
-		gc.anchor = GridBagConstraints.SOUTHWEST;
-		gc.fill = GridBagConstraints.NONE;
-		pnlAddCourse.add(lblModuleCode, gc);
-		
-		gc.gridx = 4;
-		gc.gridwidth = 2;
-		pnlAddCourse.add(lblModuleName, gc);
+		addGridBagComponent(pnlAddCourse, lblCourseCode, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddCourse, lblCourseName, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddCourse, jtfCourseCode, 1, 0);
+		addGridBagComponent(pnlAddCourse, jtfCourseName, 1, 1);
+		addGridBagComponent(pnlAddCourse, lblModuleCode, 3, 0, GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddCourse, lblModuleName, 4, 2, GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddCourse, jtfModuleCode1, 3, 1);
+		addGridBagComponent(pnlAddCourse, jtfModuleCode2, 3, 2);
+		addGridBagComponent(pnlAddCourse, jtfModuleCode3, 3, 3);
+		addGridBagComponent(pnlAddCourse, jtfModuleName1, 4, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddCourse, jtfModuleName2, 4, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddCourse, jtfModuleName3, 4, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddCourse, btnAddCourse, 2, 4, 4, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
-		gc.gridx = 3;
-		gc.gridy = 1;
-		gc.gridwidth = 1;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlAddCourse.add(jtfModuleCode1, gc);
-		
-		gc.gridy = 2;
-		pnlAddCourse.add(jtfModuleCode2, gc);
-		
-		gc.gridy = 3;
-		pnlAddCourse.add(jtfModuleCode3, gc);
-		
-		gc.gridx = 4;
-		gc.gridy = 1;
-		gc.gridwidth = 2;
-		pnlAddCourse.add(jtfModuleName1, gc);
-		
-		gc.gridy = 2;
-		pnlAddCourse.add(jtfModuleName2, gc);
-		
-		gc.gridy = 3;
-		pnlAddCourse.add(jtfModuleName3, gc);
-		
-		gc.gridx = 2;
-		gc.gridy = 4;
-		gc.gridwidth = 4;
-		gc.anchor = GridBagConstraints.NORTHWEST;
-		pnlAddCourse.add(btnAddCourse, gc);
 
 		pnlCardCourse.add(scpCourseList);
 		pnlCardCourse.add(pnlAddCourse);
@@ -869,48 +700,15 @@ public class AdminWindow extends JFrame {
 			}
 		});
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.gridheight = 1;
-		gc.weightx = 100.0;
-		gc.weighty = 100.0;
-		gc.insets = new Insets(5, 5, 5, 5);
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		
-		pnlSearchOptions.add(jcbSearchCourseNames, gc);
-		
-		gc.gridx = 1;
-		pnlSearchOptions.add(jcbSearchModuleNames, gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 1;
-		gc.anchor = GridBagConstraints.EAST;
-		gc.fill = GridBagConstraints.NONE;
-		pnlSearchOptions.add(lblFrom, gc);
-		
-		gc.gridx = 3;
-		pnlSearchOptions.add(lblTo, gc);
-		
-		gc.gridx = 1;
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		pnlSearchOptions.add(jtfDateFrom, gc);
-		
-		gc.gridx = 4;
-		pnlSearchOptions.add(jtfDateTo, gc);
-		
-		gc.gridx = 2;
-		gc.gridy = 0;
-		pnlSearchOptions.add(btnSearchModuleAttendance, gc);
-		
-		gc.gridx = 2;
-		gc.gridy = 1;
-		pnlSearchOptions.add(btnDateFrom, gc);
-		
-		gc.gridx = 5;
-		pnlSearchOptions.add(btnDateTo, gc);
+		addGridBagComponent(pnlSearchOptions, jcbSearchCourseNames, 0, 0);		
+		addGridBagComponent(pnlSearchOptions, jcbSearchModuleNames, 1, 0);
+		addGridBagComponent(pnlSearchOptions, lblFrom, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlSearchOptions, lblTo, 3, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlSearchOptions, jtfDateFrom, 1, 1);
+		addGridBagComponent(pnlSearchOptions, jtfDateTo, 4, 1);
+		addGridBagComponent(pnlSearchOptions, btnSearchModuleAttendance, 2, 0);
+		addGridBagComponent(pnlSearchOptions, btnDateFrom, 2, 1);
+		addGridBagComponent(pnlSearchOptions, btnDateTo, 5, 1);
 		
 		
 		boxBtnLoadReport.add(Box.createHorizontalGlue());
@@ -970,39 +768,15 @@ public class AdminWindow extends JFrame {
 		btnSearchStudentAttendance = new JButton("Search Student Attendance");
 		btnSearchStudentAttendance.setFont(ROBOTO_PLAIN_TITLE);
 		
-		gc.gridx = 0;
-		gc.gridy = 0;
-		gc.gridwidth = 1;
-		gc.gridheight = 1;
-		gc.weightx = 100.0;
-		gc.weighty = 100.0;
-		gc.insets = new Insets(5, 5, 5, 5);
-		gc.anchor = GridBagConstraints.WEST;
-		gc.fill = GridBagConstraints.BOTH;
-		
-		pnlSearchStudent.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridy = 1;
-		pnlSearchStudent.add(lblSearchStudent, gc);
-		
-		gc.gridx = 1;
-		pnlSearchStudent.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 0;
-		gc.gridy = 2;
-		pnlSearchStudent.add(jtfSearchStudent, gc);
-		
-		gc.gridx = 1;
-		pnlSearchStudent.add(btnSearchStudentAttendance, gc);
-		
-		gc.gridx = 2;
-		pnlSearchStudent.add(Box.createHorizontalGlue(), gc);
-		
-		gc.gridx = 3;
-		pnlSearchStudent.add(Box.createHorizontalGlue(), gc);
+		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 0, 0);
+		addGridBagComponent(pnlSearchStudent, lblSearchStudent, 0, 1);
+		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 1, 1);
+		addGridBagComponent(pnlSearchStudent, jtfSearchStudent, 0, 2);
+		addGridBagComponent(pnlSearchStudent, btnSearchStudentAttendance, 1, 2);
+		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 2, 2);
+		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 3, 2);
 		
 
-		
 		studentAttendanceCols = new String[] {"moduleName", "2022-01-01", "2022-01-08", "2022-01-15", "2022-01-22", "2022-01-29"};
 		mdlStudentAttendance = new DefaultTableModel();
 		mdlStudentAttendance.setColumnIdentifiers(studentAttendanceCols);
@@ -1072,7 +846,7 @@ public class AdminWindow extends JFrame {
 	
 	
 	// Menu JButton Click Event Handler
-	class MenuBtnActionHandler implements ActionListener {
+	private class MenuBtnActionHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			// If LOGOUT, show confirm dialog
@@ -1080,5 +854,48 @@ public class AdminWindow extends JFrame {
 			cl.show(pnlCards, e.getActionCommand());
 		}
 		
+	}
+	
+	// Helpers for gridbagconstraints
+	private void addGridBagComponent(JPanel p, JComponent c, int x, int y, int width, int height, int align, int fill) {
+		gc.gridx = x;
+		gc.gridy = y;
+		gc.gridwidth = width;
+		gc.gridheight = height;
+		gc.weightx = 100.0;
+		gc.weighty = 100.0;
+		gc.insets = new Insets(5, 5, 5, 5);
+		gc.anchor = align;
+		gc.fill = fill;
+		
+		p.add(c, gc);
+	}
+	
+	private void addGridBagComponent(JPanel p, JComponent c, int x, int y, int align, int fill) {
+		gc.gridx = x;
+		gc.gridy = y;
+		gc.gridwidth = 1;
+		gc.gridheight = 1;
+		gc.weightx = 100.0;
+		gc.weighty = 100.0;
+		gc.insets = new Insets(5, 5, 5, 5);
+		gc.anchor = align;
+		gc.fill = fill;
+		
+		p.add(c, gc);
+	}
+	
+	private void addGridBagComponent(JPanel p, JComponent c, int x, int y) {
+		gc.gridx = x;
+		gc.gridy = y;
+		gc.gridwidth = 1;
+		gc.gridheight = 1;
+		gc.weightx = 100.0;
+		gc.weighty = 100.0;
+		gc.insets = new Insets(5, 5, 5, 5);
+		gc.anchor = GridBagConstraints.WEST;
+		gc.fill = GridBagConstraints.BOTH;
+		
+		p.add(c, gc);
 	}
 }
