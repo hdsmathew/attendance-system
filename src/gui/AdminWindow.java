@@ -14,10 +14,10 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.HierarchyBoundsAdapter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -29,6 +29,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
@@ -39,9 +40,19 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+
+import model.Course;
+import model.CourseModule;
+import model.TableObjectInterface;
+import model.User;
 
 public class AdminWindow extends JFrame {
+	
+	private User admin;
+	private Course course;
 	
 	public static final String REGISTRY = "Registry";
 	public static final String LECTURER = "Lecturer";
@@ -186,9 +197,47 @@ public class AdminWindow extends JFrame {
 	public JButton btnSearchModuleAttendance;
 	public JButton btnLoadReport;
 	
-	public AdminWindow() {
+	public AdminWindow(User user) {
 		super("Admin");
+		
+		admin = user;
+		
+		// Menu Panel
+		createMenu();
+		
+		// Cards Panel
+		pnlCards = new JPanel(new CardLayout());
+		pnlCards.setBorder(BorderFactory.createEmptyBorder(7, 10, 7, 7));
+		
+		// Registry Card Panel
+		pnlCardRegistry = createRegistryCard();
+		pnlCards.add(pnlCardRegistry, REGISTRY);
+		
+		// Lecturer Card Panel
+		pnlCardLecturer = createLecturerCard();
+		pnlCards.add(pnlCardLecturer, LECTURER);
+		
+		// Course Card Panel
+		pnlCardCourse = createCourseCard();
+		pnlCards.add(pnlCardCourse, COURSE);
+		
+		// Attendance Card Panel		
+		pnlCardAttendance = createAttendanceCard();
+		pnlCards.add(pnlCardAttendance, ATTENDANCE);
+		
+		pnlContent = new JPanel(new BorderLayout());
+		pnlContent.add(pnlMenu, BorderLayout.LINE_START);
+		pnlContent.add(pnlCards, BorderLayout.CENTER);
+		
+		registerButtonListeners();
 				
+		add(pnlContent);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		pack();
+		setVisible(true);
+	}
+	
+	private void createMenu() {
 		// Menu Panel
 		pnlMenu = new JPanel(new GridLayout(0, 1));
 		pnlMenu.setBackground(new Color(2, 24, 28));
@@ -239,16 +288,10 @@ public class AdminWindow extends JFrame {
 			}
 			pnlMenu.add(btnMenu);
 		}
-		
-		
-		// Cards Panel
-		pnlCards = new JPanel(new CardLayout());
-		pnlCards.setBorder(BorderFactory.createEmptyBorder(7, 10, 7, 7));
-		
-		
-		
-		// Registry Card Panel
-		pnlCardRegistry = new JPanel(new GridLayout(0, 1, 0, 5));
+	}
+	
+	private JPanel createRegistryCard() {
+		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 5));
 		
 		registryCols = new String[] {"registryId", "name", "email", "phome", "manage"};
 		mdlRegistryList = new DefaultTableModel();
@@ -274,7 +317,16 @@ public class AdminWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				JTable table = (JTable) e.getSource();
 				int modelRow = Integer.parseInt(e.getActionCommand());
-				( (DefaultTableModel) table.getModel() ).removeRow(modelRow);
+				
+				// Confirm delete
+				// 0 OK
+				// 2 CANCEL
+				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + table.getModel().getValueAt(modelRow, 1) + "?", "Confirm Delete", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, "You chose " + choice, "Choice", JOptionPane.PLAIN_MESSAGE);
+				
+				if (choice == 0) {
+					( (DefaultTableModel) table.getModel() ).removeRow(modelRow);
+				}
 			}
 		};
 		
@@ -352,14 +404,14 @@ public class AdminWindow extends JFrame {
 		addGridBagComponent(pnlAddRegistry, btnAdd, 1, 5, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
 		
-		pnlCardRegistry.add(scpRegistryList);
-		pnlCardRegistry.add(pnlAddRegistry);
-		pnlCards.add(pnlCardRegistry, REGISTRY);
+		panel.add(scpRegistryList);
+		panel.add(pnlAddRegistry);
 		
-		
-		
-		// Lecturer Card Panel
-		pnlCardLecturer= new JPanel(new GridLayout(0, 1, 0, 5));
+		return panel;
+	}
+	
+	private JPanel createLecturerCard() {
+		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 5));
 		
 		lecturerCols = new String[] {"lecturerId", "fname", "lname", "email", "address", "phome", "status"};
 		mdlLecturerList = new DefaultTableModel();
@@ -389,7 +441,7 @@ public class AdminWindow extends JFrame {
 				String teachingStatus = (String) table.getModel().getValueAt(modelRow, 6);
 				String newStatus = (teachingStatus.equalsIgnoreCase("Active") ? "Not Active" : "Active");
 
-				table.getModel().setValueAt(newStatus, modelRow, 6);
+				( (DefaultTableModel) table.getModel() ).setValueAt(newStatus, modelRow, 6);
 			}
 		};
 		
@@ -541,12 +593,14 @@ public class AdminWindow extends JFrame {
 		pnlManageLecturer.add(pnlAddLecturer);
 		pnlManageLecturer.add(pnlAssignLecturer);
 		
-		pnlCardLecturer.add(scpLecturerList);
-		pnlCardLecturer.add(pnlManageLecturer);
-		pnlCards.add(pnlCardLecturer, LECTURER);
+		panel.add(scpLecturerList);
+		panel.add(pnlManageLecturer);
 		
-		// Course Card Panel
-		pnlCardCourse = new JPanel(new GridLayout(0, 1, 0, 5));
+		return panel;
+	}
+	
+	private JPanel createCourseCard() {
+		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 5));
 		
 		courseCols = new String[] {"courseCode", "courseName", "on offer"};
 		mdlCourseList = new DefaultTableModel();
@@ -571,12 +625,24 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JTable table = (JTable) e.getSource();
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				int modelRow = Integer.parseInt(e.getActionCommand());
 				
-				String offerStatus = (String) table.getModel().getValueAt(modelRow, 2);
+				int courseCode = (int) model.getValueAt(modelRow, 0);
+				String courseName = (String) model.getValueAt(modelRow, 1);
+				String offerStatus = (String) model.getValueAt(modelRow, 2);
 				String newStatus = (offerStatus.equalsIgnoreCase("Available") ? "Not Available" : "Available");
-
-				table.getModel().setValueAt(newStatus, modelRow, 2);
+				
+				course = new Course(courseCode, newStatus);
+				
+				int choice = JOptionPane.showConfirmDialog(null, "Set onOffer to '" + newStatus + "' for '" + courseName + "' ?", "Confirm Update", JOptionPane.WARNING_MESSAGE);
+				if (choice != 0) return; // CANCEL
+				
+				if ( course.update(admin.getUserConnection()) ) { // Update successful
+					model.setValueAt(newStatus, modelRow, 2);
+				} else {
+					JOptionPane.showMessageDialog(null, "Cannot Update");
+				}
 			}
 		};
 		
@@ -593,13 +659,7 @@ public class AdminWindow extends JFrame {
 			);
 		scpCourseList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scpCourseList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		
-		mdlCourseList.addRow(new Object[] {1, "CS", "Available"});
-		mdlCourseList.addRow(new Object[] {2, "IS", "Available"});
-		mdlCourseList.addRow(new Object[] {3, "DS", "Available"});
-		mdlCourseList.addRow(new Object[] {4, "SE", "Not Available"});
-		mdlCourseList.addRow(new Object[] {5, "AP", "Available"});
-		
+
 		pnlAddCourse = new JPanel(new GridBagLayout());
 		pnlAddCourse.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createBevelBorder(BevelBorder.LOWERED),
@@ -611,14 +671,18 @@ public class AdminWindow extends JFrame {
 		
 		jtfCourseCode = new JTextField(15);
 		jtfCourseCode.setFont(ROBOTO_PLAIN_SUB);
+		jtfCourseCode.setEditable(false);
 		jtfCourseName = new JTextField(15);
 		jtfCourseName.setFont(ROBOTO_PLAIN_SUB);
 		jtfModuleCode1 = new JTextField(15);
 		jtfModuleCode1.setFont(ROBOTO_PLAIN_SUB);
+		jtfModuleCode1.setEditable(false);
 		jtfModuleCode2 = new JTextField(15);
 		jtfModuleCode2.setFont(ROBOTO_PLAIN_SUB);
+		jtfModuleCode2.setEditable(false);
 		jtfModuleCode3 = new JTextField(15);
 		jtfModuleCode3.setFont(ROBOTO_PLAIN_SUB);
+		jtfModuleCode3.setEditable(false);
 		jtfModuleName1 = new JTextField(15);
 		jtfModuleName1.setFont(ROBOTO_PLAIN_SUB);
 		jtfModuleName2 = new JTextField(15);
@@ -642,7 +706,7 @@ public class AdminWindow extends JFrame {
 		addGridBagComponent(pnlAddCourse, jtfCourseCode, 1, 0);
 		addGridBagComponent(pnlAddCourse, jtfCourseName, 1, 1);
 		addGridBagComponent(pnlAddCourse, lblModuleCode, 3, 0, GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddCourse, lblModuleName, 4, 2, GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddCourse, lblModuleName, 4, 0, GridBagConstraints.SOUTHEAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddCourse, jtfModuleCode1, 3, 1);
 		addGridBagComponent(pnlAddCourse, jtfModuleCode2, 3, 2);
 		addGridBagComponent(pnlAddCourse, jtfModuleCode3, 3, 3);
@@ -652,12 +716,14 @@ public class AdminWindow extends JFrame {
 		addGridBagComponent(pnlAddCourse, btnAddCourse, 2, 4, 4, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
 
-		pnlCardCourse.add(scpCourseList);
-		pnlCardCourse.add(pnlAddCourse);
-		pnlCards.add(pnlCardCourse, COURSE);
+		panel.add(scpCourseList);
+		panel.add(pnlAddCourse);
 		
-		// Attendance Card Panel		
-		pnlCardAttendance = new JPanel(new GridLayout(0, 1, 0, 5));
+		return panel;
+	}
+	
+	private JPanel createAttendanceCard() {
+		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 5));
 		
 		boxModuleAttendanceList = Box.createVerticalBox();
 		pnlSearchOptions = new JPanel(new GridBagLayout());
@@ -829,29 +895,125 @@ public class AdminWindow extends JFrame {
 		boxStudentAttendance.add(Box.createVerticalStrut(10));
 		boxStudentAttendance.add(scpStudentAttendance);
 		
-		pnlCardAttendance.add(boxModuleAttendanceList);
-		pnlCardAttendance.add(boxStudentAttendance);
-		pnlCards.add(pnlCardAttendance, ATTENDANCE);
+		panel.add(boxModuleAttendanceList);
+		panel.add(boxStudentAttendance);
 		
-		
-		pnlContent = new JPanel(new BorderLayout());
-		pnlContent.add(pnlMenu, BorderLayout.LINE_START);
-		pnlContent.add(pnlCards, BorderLayout.CENTER);
-		
-		add(pnlContent);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		pack();
-		setVisible(true);
+		return panel;
 	}
 	
+	private void registerButtonListeners() {
+		btnAddCourse.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int courseCode;
+				String courseName;
+				CourseModule[] modules = new CourseModule[3];
+				
+				courseCode = Integer.parseInt(jtfCourseCode.getText());
+				courseName = jtfCourseName.getText();
+				modules[0] = new CourseModule(jtfModuleName1.getText());
+				modules[1] = new CourseModule(jtfModuleName2.getText());
+				modules[2] = new CourseModule(jtfModuleName3.getText());
+				
+				course = new Course(courseCode, courseName, modules, "Available");
+				
+				String message = "Cannot add course";
+				if ( course.add(admin.getUserConnection()) ) { // Insert Successful
+					message = "Course Added";
+					mdlCourseList.addRow( course.getObjectInfo() );
+					initializeJTextFields(COURSE);
+				}
+				JOptionPane.showMessageDialog(null, message);
+			}
+		} );
+	}
+	
+	private void populateTable(JTable table, ArrayList<TableObjectInterface> objList) {
+		// Clear any existing data
+		DefaultTableModel model = (DefaultTableModel) table.getModel();
+		model.setRowCount(0);
+		
+		for (TableObjectInterface obj : objList) {
+			model.addRow(obj.getObjectInfo());
+		}
+	}
+	
+	private void initializeJTextFields(String command) {
+		switch (command) {
+			case REGISTRY:
+
+				break;
+				
+			case LECTURER:
+
+				break;	
+				
+			case COURSE:
+				int nextModuleCode = CourseModule.getNextAvailableModuleCode(admin.getUserConnection());
+				jtfModuleCode1.setText( Integer.toString(nextModuleCode++) );
+				jtfModuleCode2.setText( Integer.toString(nextModuleCode++) );
+				jtfModuleCode3.setText( Integer.toString(nextModuleCode++) );
+				jtfCourseCode.setText( Integer.toString(Course.getNextAvailableCourseCode(admin.getUserConnection())) );
+				
+				jtfModuleName1.setText("");
+				jtfModuleName2.setText("");
+				jtfModuleName3.setText("");
+				jtfCourseName.setText("");
+						
+				break;
+				
+			case ATTENDANCE:
+
+				break;	
+				
+			default:
+		}
+	}
 	
 	// Menu JButton Click Event Handler
 	private class MenuBtnActionHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
+			
 			// If LOGOUT, show confirm dialog
-			CardLayout cl = (CardLayout) pnlCards.getLayout();
-			cl.show(pnlCards, e.getActionCommand());
+			if (e.getSource() == btnLogout) {
+				// 0 OK
+				// 2 CANCEL
+				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "Confirm Logout", JOptionPane.WARNING_MESSAGE);
+				JOptionPane.showMessageDialog(null, "You chose " + choice, "Choice", JOptionPane.PLAIN_MESSAGE);
+				
+			} else {
+				String command = e.getActionCommand();
+				JTable table = null;
+				ArrayList<TableObjectInterface> objList = new ArrayList<>();
+				
+				switch (command) {
+					case REGISTRY:
+						table = tblRegistryList;
+						objList = Course.readAll(admin.getUserConnection());
+						break;
+					case LECTURER:
+						table = tblLecturerList;
+						objList = Course.readAll(admin.getUserConnection());
+						break;	
+					case COURSE:
+						table = tblCourseList;
+						objList = Course.readAll(admin.getUserConnection());
+						break;
+					case ATTENDANCE:
+						table = tblModuleAttendanceList;
+						objList = Course.readAll(admin.getUserConnection());
+						break;	
+					default:
+				}
+				
+				populateTable(table, objList);
+				initializeJTextFields(command);
+				
+				CardLayout cl = (CardLayout) pnlCards.getLayout();
+				cl.show(pnlCards, command);
+			}
 		}
 		
 	}
