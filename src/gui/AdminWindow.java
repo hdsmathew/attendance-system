@@ -40,18 +40,16 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
+import model.Admin;
 import model.Course;
 import model.CourseModule;
 import model.TableObjectInterface;
-import model.User;
 
 public class AdminWindow extends JFrame {
 	
-	private User admin;
+	private Admin admin;
 	private Course course;
 	
 	public static final String REGISTRY = "Registry";
@@ -197,7 +195,7 @@ public class AdminWindow extends JFrame {
 	public JButton btnSearchModuleAttendance;
 	public JButton btnLoadReport;
 	
-	public AdminWindow(User user) {
+	public AdminWindow(Admin user) {
 		super("Admin");
 		
 		admin = user;
@@ -919,7 +917,7 @@ public class AdminWindow extends JFrame {
 				course = new Course(courseCode, courseName, modules, "Available");
 				
 				String message = "Cannot add course";
-				if ( course.add(admin.getUserConnection()) ) { // Insert Successful
+				if ( admin.addCourse(course) ) { // Insert Successful
 					message = "Course Added";
 					mdlCourseList.addRow( course.getObjectInfo() );
 					initializeJTextFields(COURSE);
