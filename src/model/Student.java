@@ -23,6 +23,12 @@ public class Student implements TableObjectInterface {
 		studentId = id;
 	}
 	
+	public Student(int id, String fname, String lname) {
+		studentId = id;
+		this.fname = fname;
+		this.lname = lname;
+	}
+	
 	public Student(int id, String fname, String lname, String address, String email, int phoneNo, int courseCode, LocalDate enrollDate) {
 		this.studentId = id;
 		this.fname = fname;
@@ -34,19 +40,27 @@ public class Student implements TableObjectInterface {
 		this.enrollDate = enrollDate;
 	}
 	
+	public int getStudentId() {
+		return studentId;
+	}
+	
+	public String getStudentName() {
+		return fname + " " + lname;
+	}
+	
+	public int getCourseCode() {
+		return courseCode;
+	}
+	
 	@Override
 	public Object[] getObjectInfo() {
 		return new Object[] {studentId, fname, lname, address, email, phoneNo, courseCode, enrollDate};
 	}
 	
-	public int getStudentId() {
-		return studentId;
-	}
-	
 	public boolean read(Connection conn) {
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE studentID = ? AND active = 1;");
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE s.studentID = ? AND active = 1;");
 			stmt.setInt(1, this.studentId);
 			ResultSet rs = stmt.executeQuery();
 			
@@ -111,7 +125,26 @@ public class Student implements TableObjectInterface {
 		ArrayList<TableObjectInterface> students = new ArrayList<>();
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE active = 1;");
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student WHERE active = 1;");
+			ResultSet rs = stmt.executeQuery();
+			
+			while (rs.next()) {
+				students.add( new Student( rs.getInt("studentID"), rs.getString("fname"), rs.getString("lname"), rs.getString("address"), rs.getString("email"), rs.getInt("phoneNo"), rs.getInt("courseCode"), rs.getObject("enrollDate", LocalDate.class)) );
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return students;
+	}
+	
+	public static ArrayList<TableObjectInterface> readAll(Connection conn, int moduleCode) {
+		ArrayList<TableObjectInterface> students = new ArrayList<>();
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID INNER JOIN module m ON e.courseCode = m.courseCode WHERE s.active = 1 AND m.moduleCode = ?;");
+			stmt.setInt(1, moduleCode);
 			ResultSet rs = stmt.executeQuery();
 			
 			while (rs.next()) {

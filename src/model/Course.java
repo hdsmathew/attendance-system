@@ -14,6 +14,10 @@ public class Course implements TableObjectInterface {
 	private CourseModule[] modules;
 	private String onOffer;
 	
+	public Course(int cc) {
+		courseCode = cc;
+	}
+	
 	public Course(int cc, String o) {
 		courseCode = cc;
 		onOffer = o;
@@ -32,6 +36,28 @@ public class Course implements TableObjectInterface {
 		onOffer = o;
 	}
 	
+	public int getCourseCode() {
+		return courseCode;
+	}
+	
+	public String getCourseName() {
+		return courseName;
+	}
+	
+	public String[] getModuleNames() {
+		String[] moduleNames = new String[3];
+		
+		for (int i = 0; i < 3; i++) {
+			moduleNames[i] = modules[i].getModuleName();			
+		}
+		
+		return moduleNames;
+	}
+	
+	public CourseModule[] getModules() {
+		return modules;
+	}
+	
 	@Override
 	public Object[] getObjectInfo() {
 		return new Object[] {courseCode, courseName, onOffer};
@@ -39,6 +65,38 @@ public class Course implements TableObjectInterface {
 	
 	public String toString() {
 		return courseCode + " | " + courseName + " | " + onOffer;
+	}
+	
+	public boolean read(Connection conn) {
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM course WHERE courseCode = ?;");
+			stmt.setInt(1, this.courseCode);
+			ResultSet rs = stmt.executeQuery();
+			
+			this.modules = new CourseModule[3];
+			if (rs.next()) {
+				this.courseName = rs.getString("courseName");
+				this.onOffer = (rs.getInt("onOffer") == 1) ? "Available" : "Not Available";
+				
+				stmt = conn.prepareStatement("SELECT * FROM module WHERE courseCode = ?;");
+				stmt.setInt(1, this.courseCode);
+				rs = stmt.executeQuery();
+				
+				int i = 0;
+				while (rs.next()) {
+					this.modules[i++] = new CourseModule(rs.getInt("moduleCode"), rs.getString("moduleName"));
+				}
+				
+				return true;
+			}
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
 	}
 	
 	public boolean add(Connection conn) {
@@ -82,11 +140,21 @@ public class Course implements TableObjectInterface {
 		ArrayList<TableObjectInterface> courses = new ArrayList<>();
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM course;");
-			ResultSet rs = stmt.executeQuery();
+			PreparedStatement moduleStmt = conn.prepareStatement("SELECT * FROM module WHERE courseCode = ?;");
+			ResultSet moduleRs;
+			PreparedStatement courseStmt = conn.prepareStatement("SELECT * FROM course;");
+			ResultSet rs = courseStmt.executeQuery();
 			
 			while (rs.next()) {
-				courses.add( new Course(rs.getInt("courseCode"), rs.getString("courseName"), (rs.getInt("onOffer") == 1) ? "Available" : "Not Available") );
+				moduleStmt.setInt(1, rs.getInt("courseCode"));
+				moduleRs = moduleStmt.executeQuery();
+				CourseModule[] modules = new CourseModule[3];
+				int i = 0;
+				
+				while (moduleRs.next()) {
+					modules[i++] = new CourseModule(moduleRs.getInt("moduleCode"), moduleRs.getString("moduleName"));
+				}
+				courses.add( new Course(rs.getInt("courseCode"), rs.getString("courseName"), modules, (rs.getInt("onOffer") == 1) ? "Available" : "Not Available") );
 			}
 			
 		} catch (SQLException e) {

@@ -18,6 +18,11 @@ public class CourseModule {
 		moduleName = n;
 	}
 	
+	public CourseModule(int mc, String n) {
+		moduleCode = mc;
+		moduleName = n;
+	}
+	
 	public CourseModule(int mc, String n, int cc) {
 		moduleCode = mc;
 		moduleName = n;

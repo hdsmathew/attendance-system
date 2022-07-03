@@ -14,16 +14,21 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -43,14 +48,30 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import model.Admin;
+import model.Attendance;
 import model.Course;
 import model.CourseModule;
+import model.Student;
 import model.TableObjectInterface;
 
 public class AdminWindow extends JFrame {
 	
 	private Admin admin;
 	private Course course;
+	private CourseModule module;
+	private Student student;
+	private ArrayList<Attendance> attendances;
+	private ArrayList<TableObjectInterface> courses;
+	private ArrayList<TableObjectInterface> students;
+	private ArrayList<Integer> studentIds;
+	private ArrayList<String> studentNames;
+	private CourseModule[] studentModules;
+	
+	private Map<LocalDate, ArrayList<Boolean>> moduleAttendancesColsData;
+	private Map<String, String[]> courseModulesMap = new HashMap<>();
+	private Map<String, Integer> moduleCodeNameMap = new HashMap<>();
+	private DefaultComboBoxModel<String> mdlCourseNames;
+	private DefaultComboBoxModel<String> mdlCourseModuleNames;
 	
 	public static final String REGISTRY = "Registry";
 	public static final String LECTURER = "Lecturer";
@@ -62,7 +83,6 @@ public class AdminWindow extends JFrame {
 	public static final Font ROBOTO_BOLD_SUB = new Font("roboto", Font.BOLD, 16);
 	public static final Font ROBOTO_PLAIN_TITLE = new Font("roboto", Font.PLAIN, 16);
 	public static final Font ROBOTO_PLAIN_SUB = new Font("roboto", Font.PLAIN, 14);
-
 	
 	public JPanel pnlContent;
 	public JPanel pnlMenu;
@@ -118,9 +138,7 @@ public class AdminWindow extends JFrame {
 	public String[] lecturerNames;
 	public int[] lecturerIds;
 	public int[] courseCodes;
-	public int[] moduleCodes;
 	public String[] courseNames;
-	public String[] moduleNames;
 	public JComboBox<String> jcbAssignLectNames;
 	public JComboBox<String> jcbAssignCourseNames;
 	public JComboBox<String> jcbAssignModuleNames;
@@ -168,10 +186,9 @@ public class AdminWindow extends JFrame {
 	// Attendance Components
 	public Box boxStudentAttendance;
 	public JPanel pnlSearchStudent;
-	public JTable tblStudentAttendance;
-	public JScrollPane scpStudentAttendance;
-	public DefaultTableModel mdlStudentAttendance;
-	public String[] studentAttendanceCols;
+	public JTable[] tblStudentAttendanceModules = new JTable[3];
+	public JScrollPane[] scpStudentAttendanceModules = new JScrollPane[3];
+	public DefaultTableModel[] mdlStudentAttendanceModules = new DefaultTableModel[3];
 	public JLabel lblSearchStudent;
 	public JTextField jtfSearchStudent;
 	public Box boxModuleAttendanceList;
@@ -180,7 +197,6 @@ public class AdminWindow extends JFrame {
 	public JTable tblModuleAttendanceList;
 	public JScrollPane scpModuleAttendanceList;
 	public DefaultTableModel mdlModuleAttendanceList;
-	public String[] moduleAttendanceCols;
 	public JComboBox<String> jcbSearchCourseNames;
 	public JComboBox<String> jcbSearchModuleNames;
 	public JLabel lblFrom;
@@ -541,18 +557,14 @@ public class AdminWindow extends JFrame {
 		courseCodes = new int[] {
 				1, 2, 3, 4, 5
 		};
-		moduleCodes = new int[] {
-				1, 2, 3, 4, 5
-		};
+
 		lecturerNames = new String[] {
 				"Pava", "Vara", "Suda", "Nuja", "Sona"
 		};
 		courseNames = new String[] {
 				"CS", "IS", "SE", "AP", "DS"
 		};
-		moduleNames = new String[] {
-				"Maths", "Architecture", "Formal", "Database", "OOP"
-		};
+
 		
 		jcbAssignLectNames = new JComboBox<>(lecturerNames);
 		jcbAssignLectNames.setFont(ROBOTO_PLAIN_SUB);
@@ -560,7 +572,7 @@ public class AdminWindow extends JFrame {
 		jcbAssignCourseNames = new JComboBox<>(courseNames);
 		jcbAssignCourseNames.setFont(ROBOTO_PLAIN_SUB);
 		jcbAssignCourseNames.setMaximumRowCount(5);
-		jcbAssignModuleNames = new JComboBox<>(moduleNames);
+		jcbAssignModuleNames = new JComboBox<>(courseNames);
 		jcbAssignModuleNames.setFont(ROBOTO_PLAIN_SUB);
 		jcbAssignModuleNames.setMaximumRowCount(5);
 		btnAssignLect = new JButton("Assign Module");
@@ -727,17 +739,19 @@ public class AdminWindow extends JFrame {
 		pnlSearchOptions = new JPanel(new GridBagLayout());
 		boxBtnLoadReport = Box.createHorizontalBox();
 		
-		jcbSearchCourseNames = new JComboBox<>(courseNames);
+		jcbSearchCourseNames = new JComboBox<>();
 		jcbSearchCourseNames.setFont(ROBOTO_PLAIN_SUB);
-		jcbSearchModuleNames = new JComboBox<>(moduleNames);
+		jcbSearchModuleNames = new JComboBox<>();
 		jcbSearchModuleNames.setFont(ROBOTO_PLAIN_SUB);
 		lblFrom = new JLabel("From");
 		lblFrom.setFont(ROBOTO_PLAIN_TITLE);
 		lblTo = new JLabel("To");
 		lblTo.setFont(ROBOTO_PLAIN_TITLE);
 		jtfDateFrom = new JTextField(7);
+		jtfDateFrom.setEditable(false);
 		jtfDateFrom.setFont(ROBOTO_PLAIN_SUB);
 		jtfDateTo = new JTextField(7);
+		jtfDateTo.setEditable(false);
 		jtfDateTo.setFont(ROBOTO_PLAIN_SUB);
 		btnSearchModuleAttendance = new JButton("Search Module Attendance");
 		btnSearchModuleAttendance.setFont(ROBOTO_PLAIN_TITLE);
@@ -777,11 +791,6 @@ public class AdminWindow extends JFrame {
 		
 		boxBtnLoadReport.add(Box.createHorizontalGlue());
 		boxBtnLoadReport.add(btnLoadReport);
-
-		
-		moduleAttendanceCols = new String[] {"studentName", "2022-01-01", "2022-01-08", "2022-01-15", "2022-01-22", "2022-01-29"};
-		mdlModuleAttendanceList = new DefaultTableModel();
-		mdlModuleAttendanceList.setColumnIdentifiers(moduleAttendanceCols);
 		
 		tblModuleAttendanceList = new JTable() {
 			
@@ -792,13 +801,13 @@ public class AdminWindow extends JFrame {
 			
 			@Override
 			public Class getColumnClass(int column) {
-				if (column != 0) {
-					return Boolean.class;
+				if (column == 0 || column == 1) {
+					return String.class;
 				}
-				return String.class;
+				return Boolean.class;
 			}
 		};
-		tblModuleAttendanceList.setModel(mdlModuleAttendanceList);
+
 		tblModuleAttendanceList.setRowHeight(30);
 		tblModuleAttendanceList.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		tblModuleAttendanceList.setFillsViewportHeight(true);
@@ -814,13 +823,6 @@ public class AdminWindow extends JFrame {
 			);
 		scpModuleAttendanceList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scpModuleAttendanceList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		
-		mdlModuleAttendanceList.addRow(new Object[] {"mathew1", true, false, false, true, true});
-		mdlModuleAttendanceList.addRow(new Object[] {"mathew2", false, false, false, false, false});
-		mdlModuleAttendanceList.addRow(new Object[] {"mathew3", true, true, true, false, false});
-		mdlModuleAttendanceList.addRow(new Object[] {"mathew4", false, false, true, true, true});
-		mdlModuleAttendanceList.addRow(new Object[] {"mathew5", true, true, true, true, true});
-		
 		
 		boxStudentAttendance = Box.createVerticalBox();
 		pnlSearchStudent = new JPanel(new GridBagLayout());
@@ -840,48 +842,38 @@ public class AdminWindow extends JFrame {
 		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 2, 2);
 		addGridBagComponent(pnlSearchStudent, (JComponent) Box.createHorizontalGlue(), 3, 2);
 		
-
-		studentAttendanceCols = new String[] {"moduleName", "2022-01-01", "2022-01-08", "2022-01-15", "2022-01-22", "2022-01-29"};
-		mdlStudentAttendance = new DefaultTableModel();
-		mdlStudentAttendance.setColumnIdentifiers(studentAttendanceCols);
-		
-		tblStudentAttendance = new JTable() {
-			
-			@Override
-			public boolean isCellEditable(int row, int column) {
-				return false;
-			}
-			
-			@Override
-			public Class getColumnClass(int column) {
-				if (column != 0) {
+		for (int i = 0; i < 3; i++) {
+			tblStudentAttendanceModules[i] = new JTable() {
+				
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+				
+				@Override
+				public Class getColumnClass(int column) {
+					if (column == 0 || column == 1) {
+						return String.class;
+					}
 					return Boolean.class;
 				}
-				return String.class;
-			}
-		};
-		tblStudentAttendance.setModel(mdlStudentAttendance);
-		tblStudentAttendance.setRowHeight(30);
-		tblStudentAttendance.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		tblStudentAttendance.setFillsViewportHeight(true);
-		tblStudentAttendance.setPreferredScrollableViewportSize(new Dimension(1000, 300));
-		
-		scpStudentAttendance = new JScrollPane(tblStudentAttendance);
-		scpStudentAttendance.setBorder(BorderFactory.createTitledBorder(
-				BorderFactory.createBevelBorder(BevelBorder.LOWERED),
-				"Student Attendance",
-				TitledBorder.LEFT,
-				TitledBorder.ABOVE_TOP,
-				ROBOTO_BOLD_SUB)
-			);
-		scpStudentAttendance.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		scpStudentAttendance.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		
-		mdlStudentAttendance.addRow(new Object[] {"Maths", true, false, false, true, true});
-		mdlStudentAttendance.addRow(new Object[] {"Formal", false, false, false, false, false});
-		mdlStudentAttendance.addRow(new Object[] {"Database", true, true, true, false, false});
-		mdlStudentAttendance.addRow(new Object[] {"OOP", false, false, true, true, true});
-		mdlStudentAttendance.addRow(new Object[] {"Architecture", true, true, true, true, true});
+			};
+			tblStudentAttendanceModules[i].setRowHeight(30);
+			tblStudentAttendanceModules[i].setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+			tblStudentAttendanceModules[i].setFillsViewportHeight(true);
+			tblStudentAttendanceModules[i].setPreferredScrollableViewportSize(new Dimension(1000, 300));
+			
+			scpStudentAttendanceModules[i] = new JScrollPane(tblStudentAttendanceModules[i]);
+			scpStudentAttendanceModules[i].setBorder(BorderFactory.createTitledBorder(
+					BorderFactory.createBevelBorder(BevelBorder.LOWERED),
+					"Student Module Attendance",
+					TitledBorder.LEFT,
+					TitledBorder.ABOVE_TOP,
+					ROBOTO_BOLD_SUB)
+				);
+			scpStudentAttendanceModules[i].setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scpStudentAttendanceModules[i].setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		}
 		
 		boxModuleAttendanceList.add(pnlSearchOptions);
 		boxModuleAttendanceList.add(Box.createVerticalStrut(10));
@@ -891,7 +883,9 @@ public class AdminWindow extends JFrame {
 		
 		boxStudentAttendance.add(pnlSearchStudent);
 		boxStudentAttendance.add(Box.createVerticalStrut(10));
-		boxStudentAttendance.add(scpStudentAttendance);
+		for (JScrollPane scp : scpStudentAttendanceModules) {
+			boxStudentAttendance.add(scp);
+		}
 		
 		panel.add(boxModuleAttendanceList);
 		panel.add(boxStudentAttendance);
@@ -900,6 +894,8 @@ public class AdminWindow extends JFrame {
 	}
 	
 	private void registerButtonListeners() {
+		
+		// Course Card :: Add Course
 		btnAddCourse.addActionListener( new ActionListener() {
 			
 			@Override
@@ -920,11 +916,128 @@ public class AdminWindow extends JFrame {
 				if ( admin.addCourse(course) ) { // Insert Successful
 					message = "Course Added";
 					mdlCourseList.addRow( course.getObjectInfo() );
-					initializeJTextFields(COURSE);
+					initializeJTextFieldAndComboBox(COURSE);
 				}
 				JOptionPane.showMessageDialog(null, message);
 			}
 		} );
+		
+		// Attendance Card :: Show modules for selected Course
+		jcbSearchCourseNames.addItemListener( new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					mdlCourseModuleNames = new DefaultComboBoxModel<>( courseModulesMap.get( (String) jcbSearchCourseNames.getSelectedItem() ) );
+					jcbSearchModuleNames.setModel(mdlCourseModuleNames);
+				}
+			}
+		} );
+		
+		// Attendance Card :: Search Module attendances
+		btnSearchModuleAttendance.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {				
+				String moduleSelected = (String) jcbSearchModuleNames.getSelectedItem();
+				int moduleCode = moduleCodeNameMap.get(moduleSelected);
+				module = new CourseModule( moduleCode, moduleSelected );
+				
+				String dateFromStr = jtfDateFrom.getText();
+				String dateToStr = jtfDateTo.getText();
+				
+				if ( !(dateFromStr.isEmpty() || dateToStr.isEmpty()) ) {
+					
+					LocalDate dateFrom = LocalDate.parse(dateFromStr);
+					LocalDate dateTo = LocalDate.parse(dateToStr);
+					
+					if (dateFrom.isAfter(dateTo)) {
+						JOptionPane.showMessageDialog(null, "Date From cannot be after Date To", "Invalid Date", JOptionPane.WARNING_MESSAGE);
+						return;
+					}
+					attendances = Attendance.readAttendance(admin.getUserConnection(), module, dateFrom, dateTo);
+					
+				} else {
+					attendances = Attendance.readAttendance(admin.getUserConnection(), module);
+				}
+				
+				// Setting attendance for each date in same order as studentId
+				ArrayList<Boolean> presence;
+				moduleAttendancesColsData = new HashMap<>();
+				for (Attendance a : attendances) {
+					
+					if (!moduleAttendancesColsData.containsKey(a.getDate())) {
+						moduleAttendancesColsData.put(a.getDate(), new ArrayList<>());
+					}
+					
+					presence = moduleAttendancesColsData.get(a.getDate());
+					presence.add(a.getPresence());
+					
+					moduleAttendancesColsData.put(a.getDate(), presence);
+				}
+				
+				// Retrieving student names and ids
+				students = Student.readAll(admin.getUserConnection(), moduleCode);
+				studentIds = new ArrayList<>();
+				studentNames = new ArrayList<>();
+				for (TableObjectInterface student : students) {
+					studentIds.add( ((Student) student).getStudentId() );
+					studentNames.add( ((Student) student).getStudentName() );
+				}
+
+				mdlModuleAttendanceList = new DefaultTableModel();
+				mdlModuleAttendanceList.addColumn("studentId", studentIds.toArray());
+				mdlModuleAttendanceList.addColumn("studentName", studentNames.toArray());
+				
+				for (Map.Entry<LocalDate, ArrayList<Boolean>> entry : moduleAttendancesColsData.entrySet()) {
+					mdlModuleAttendanceList.addColumn(entry.getKey(), entry.getValue().toArray());
+				}
+				
+				tblModuleAttendanceList.setModel(mdlModuleAttendanceList);
+			}
+		} );
+		
+		// Attendance Card :: Search Module attendances
+		btnSearchStudentAttendance.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String studentIdStr = jtfSearchStudent.getText();
+				
+				if (studentIdStr.isEmpty()) return;
+				
+				student = new Student( Integer.parseInt(studentIdStr) );
+				
+				if ( !student.read(admin.getUserConnection()) ) { // Invalid id
+					JOptionPane.showMessageDialog(null,  "Invalid Student Id", "Invalid Id", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				
+				course = new Course(student.getCourseCode()); // Student enrolled course
+				course.read(admin.getUserConnection()); // Get course modules
+				studentModules = course.getModules();
+								
+				// Initialise first and second columns
+				for (int i = 0; i < 3; i++) {
+					mdlStudentAttendanceModules[i] = new DefaultTableModel();
+					mdlStudentAttendanceModules[i].addColumn("moduleCode", new Integer[] { studentModules[i].getModuleCode() });
+					mdlStudentAttendanceModules[i].addColumn("moduleName", new String[] { studentModules[i].getModuleName() });
+
+					tblStudentAttendanceModules[i].setModel(mdlStudentAttendanceModules[i]);
+				}
+				
+				// Fill Tables
+				int i;
+				attendances = Attendance.readAttendance(admin.getUserConnection(), student);
+				for (Attendance a : attendances) {
+					
+					for (i = 0; studentModules[i].getModuleCode() != a.getModule().getModuleCode(); i++);
+					mdlStudentAttendanceModules[i].addColumn(a.getDate(), new Boolean[] { a.getPresence() });
+				}
+			}
+		} );
+		
 	}
 	
 	private void populateTable(JTable table, ArrayList<TableObjectInterface> objList) {
@@ -937,7 +1050,7 @@ public class AdminWindow extends JFrame {
 		}
 	}
 	
-	private void initializeJTextFields(String command) {
+	private void initializeJTextFieldAndComboBox(String command) {
 		switch (command) {
 			case REGISTRY:
 
@@ -962,6 +1075,21 @@ public class AdminWindow extends JFrame {
 				break;
 				
 			case ATTENDANCE:
+				courses = Course.readAll(admin.getUserConnection());
+				
+				for (TableObjectInterface course : courses) {
+					courseModulesMap.put( ((Course) course).getCourseName(), ((Course) course).getModuleNames());
+					
+					for (CourseModule m : ((Course) course).getModules()) {
+						moduleCodeNameMap.put( m.getModuleName(), m.getModuleCode() );
+					}
+				}
+																
+				mdlCourseNames = new DefaultComboBoxModel<>( courseModulesMap.keySet().toArray(new String[courseModulesMap.size()]) );
+				jcbSearchCourseNames.setModel(mdlCourseNames);
+				
+				mdlCourseModuleNames = new DefaultComboBoxModel<>( courseModulesMap.get( (String) jcbSearchCourseNames.getItemAt(0) ) );
+				jcbSearchModuleNames.setModel(mdlCourseModuleNames);
 
 				break;	
 				
@@ -1000,14 +1128,16 @@ public class AdminWindow extends JFrame {
 						objList = Course.readAll(admin.getUserConnection());
 						break;
 					case ATTENDANCE:
-						table = tblModuleAttendanceList;
-						objList = Course.readAll(admin.getUserConnection());
-						break;	
+						break;
 					default:
+						CardLayout cl = (CardLayout) pnlCards.getLayout();
+						cl.show(pnlCards, command);
+						return;
+						
 				}
 				
-				populateTable(table, objList);
-				initializeJTextFields(command);
+				if ( !command.equalsIgnoreCase(ATTENDANCE) ) populateTable(table, objList);
+				initializeJTextFieldAndComboBox(command);
 				
 				CardLayout cl = (CardLayout) pnlCards.getLayout();
 				cl.show(pnlCards, command);
