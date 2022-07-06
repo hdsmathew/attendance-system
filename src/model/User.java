@@ -7,13 +7,15 @@ import java.sql.SQLException;
 
 
 public class User {
-	private int userId;
-	private String password;
+	protected int userId;
+	protected String password;
 	protected Connection conn;
 	
 	public User() {
-		userId = -1;
-		password = "";
+	}
+	
+	public User(int id) {
+		userId = id;
 		conn = null;
 	}
 	

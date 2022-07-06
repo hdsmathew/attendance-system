@@ -1,9 +1,11 @@
 package model;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 
 public class CourseModule {
 	private int moduleCode;
@@ -39,6 +41,24 @@ public class CourseModule {
 	
 	public int getCourseCode() {
 		return courseCode;
+	}
+	
+	public static ArrayList<CourseModule> readAll(Connection conn) {
+		ArrayList<CourseModule> modules = new ArrayList<>();
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM module;");
+			ResultSet rs = stmt.executeQuery();
+			
+			while (rs.next()) {
+				modules.add( new CourseModule( rs.getInt("moduleCode"), rs.getString("moduleName") ) );
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return modules;
 	}
 	
 	public static int getNextAvailableModuleCode(Connection conn) {

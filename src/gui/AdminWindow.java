@@ -51,17 +51,22 @@ import model.Admin;
 import model.Attendance;
 import model.Course;
 import model.CourseModule;
+import model.Lecturer;
+import model.Registry;
 import model.Student;
 import model.TableObjectInterface;
 
 public class AdminWindow extends JFrame {
 	
 	private Admin admin;
+	private Registry registry;
+	private Lecturer lecturer;
 	private Course course;
 	private CourseModule module;
 	private Student student;
 	private ArrayList<Attendance> attendances;
 	private ArrayList<TableObjectInterface> courses;
+	private ArrayList<TableObjectInterface> lecturers;
 	private ArrayList<TableObjectInterface> students;
 	private ArrayList<Integer> studentIds;
 	private ArrayList<String> studentNames;
@@ -69,7 +74,9 @@ public class AdminWindow extends JFrame {
 	
 	private Map<LocalDate, ArrayList<Boolean>> moduleAttendancesColsData;
 	private Map<String, String[]> courseModulesMap = new HashMap<>();
-	private Map<String, Integer> moduleCodeNameMap = new HashMap<>();
+	private Map<String, Integer> moduleNameCodeMap = new HashMap<>();
+	private Map<String, Integer> lecturerNameIdMap = new HashMap<>();
+	private DefaultComboBoxModel<String> mdlLecturerNames;
 	private DefaultComboBoxModel<String> mdlCourseNames;
 	private DefaultComboBoxModel<String> mdlCourseModuleNames;
 	
@@ -115,16 +122,18 @@ public class AdminWindow extends JFrame {
 	public DefaultTableModel mdlRegistryList;
 	public String[] registryCols;
 	public JTextField jtfUserId;
-	public JTextField jtfName;
+	public JTextField jtfFname;
+	public JTextField jtfLname;
 	public JTextField jtfEmail;
 	public JTextField jtfPhone;
 	public JPasswordField jtfPassword;
 	public JLabel lblUserId;
-	public JLabel lblName;
+	public JLabel lblFname;
+	public JLabel lblLname;
 	public JLabel lblEmail;
 	public JLabel lblPhone;
 	public JLabel lblPassword;
-	public JButton btnAdd;
+	public JButton btnAddRegistry;
 	
 	// Lecturer Components
 	public JPanel pnlManageLecturer;
@@ -307,7 +316,7 @@ public class AdminWindow extends JFrame {
 	private JPanel createRegistryCard() {
 		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 5));
 		
-		registryCols = new String[] {"registryId", "name", "email", "phome", "manage"};
+		registryCols = new String[] {"registryId", "fullname", "email", "phome", "manage"};
 		mdlRegistryList = new DefaultTableModel();
 		mdlRegistryList.setColumnIdentifiers(registryCols);
 		
@@ -330,16 +339,23 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JTable table = (JTable) e.getSource();
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				int modelRow = Integer.parseInt(e.getActionCommand());
+				int registryId = (int) model.getValueAt(modelRow, 0);
 				
 				// Confirm delete
 				// 0 OK
 				// 2 CANCEL
-				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete " + table.getModel().getValueAt(modelRow, 1) + "?", "Confirm Delete", JOptionPane.WARNING_MESSAGE);
-				JOptionPane.showMessageDialog(null, "You chose " + choice, "Choice", JOptionPane.PLAIN_MESSAGE);
+				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete registry with id = " + registryId + "?", "Confirm Delete", JOptionPane.WARNING_MESSAGE);
+				if (choice != 0) return; // CANCEL
 				
-				if (choice == 0) {
-					( (DefaultTableModel) table.getModel() ).removeRow(modelRow);
+				registry = new Registry(registryId);
+				
+				if ( admin.deleteRegistry(registry) ) { // Delete successful
+					model.removeRow(modelRow);
+					initializeJTextFieldAndComboBox(REGISTRY);
+				} else {
+					JOptionPane.showMessageDialog(null, "Cannot Delete");
 				}
 			}
 		};
@@ -358,13 +374,6 @@ public class AdminWindow extends JFrame {
 		scpRegistryList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scpRegistryList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		
-		mdlRegistryList.addRow(new Object[] {1, "Mathew", "hdsmathew@gmail.com", 57087019, "Delete"});
-		mdlRegistryList.addRow(new Object[] {2, "Mathew1", "hdsmathew@gmail.com", 57087019, "Delete"});
-		mdlRegistryList.addRow(new Object[] {3, "Mathew2", "hdsmathew@gmail.com", 57087019, "Delete"});
-		mdlRegistryList.addRow(new Object[] {4, "Mathew3", "hdsmathew@gmail.com", 57087019, "Delete"});
-		mdlRegistryList.addRow(new Object[] {5, "Mathew4", "hdsmathew@gmail.com", 57087019, "Delete"});
-		mdlRegistryList.addRow(new Object[] {6, "Mathew5", "hdsmathew@gmail.com", 57087019, "Delete"});
-		
 		pnlAddRegistry = new JPanel(new GridBagLayout());
 		pnlAddRegistry.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createBevelBorder(BevelBorder.LOWERED),
@@ -376,8 +385,11 @@ public class AdminWindow extends JFrame {
 		
 		jtfUserId = new JTextField(15);
 		jtfUserId.setFont(ROBOTO_PLAIN_SUB);
-		jtfName = new JTextField(15);
-		jtfName.setFont(ROBOTO_PLAIN_SUB);
+		jtfUserId.setEditable(false);
+		jtfFname = new JTextField(15);
+		jtfFname.setFont(ROBOTO_PLAIN_SUB);
+		jtfLname = new JTextField(15);
+		jtfLname.setFont(ROBOTO_PLAIN_SUB);
 		jtfEmail = new JTextField(15);
 		jtfEmail.setFont(ROBOTO_PLAIN_SUB);
 		jtfPhone = new JTextField(15);
@@ -386,37 +398,44 @@ public class AdminWindow extends JFrame {
 		jtfPassword.setFont(ROBOTO_PLAIN_SUB);
 		lblUserId = new JLabel("UserId");
 		lblUserId.setFont(ROBOTO_PLAIN_TITLE);
-		lblName = new JLabel("Name");
-		lblName.setFont(ROBOTO_PLAIN_TITLE);
+		lblFname = new JLabel("fname");
+		lblFname.setFont(ROBOTO_PLAIN_TITLE);
+		lblLname = new JLabel("lname");
+		lblLname.setFont(ROBOTO_PLAIN_TITLE);
 		lblEmail = new JLabel("Email");
 		lblEmail.setFont(ROBOTO_PLAIN_TITLE);
 		lblPhone = new JLabel("Phone");
 		lblPhone.setFont(ROBOTO_PLAIN_TITLE);
 		lblPassword = new JLabel("Password");
 		lblPassword.setFont(ROBOTO_PLAIN_TITLE);
-		btnAdd = new JButton("Add Registry");
-		btnAdd.setFont(ROBOTO_PLAIN_TITLE);
+		btnAddRegistry = new JButton("Add Registry");
+		btnAddRegistry.setFont(ROBOTO_PLAIN_TITLE);
 		
 		gc = new GridBagConstraints();
 		
 		
 		addGridBagComponent(pnlAddRegistry, lblUserId, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddRegistry, lblName, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddRegistry, lblEmail, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddRegistry, lblPhone, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddRegistry, lblPassword, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblFname, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblLname, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblEmail, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblPhone, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblPassword, 0, 5, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, jtfUserId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddRegistry, jtfName, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddRegistry, jtfEmail, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddRegistry, jtfPhone, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddRegistry, jtfPassword, 1, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfFname, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfLname, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfEmail, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfPhone, 1, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfPassword, 1, 5, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, (JComponent) Box.createHorizontalGlue(), 2, 5, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddRegistry, btnAdd, 1, 5, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, btnAddRegistry, 1, 6, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
+		// Populate Table And Initialise fields for first card
+		populateTable( tblRegistryList, Registry.readAll(admin.getUserConnection()) );
+		initializeJTextFieldAndComboBox(REGISTRY);
 		
 		panel.add(scpRegistryList);
 		panel.add(pnlAddRegistry);
@@ -450,12 +469,22 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JTable table = (JTable) e.getSource();
+				DefaultTableModel model = (DefaultTableModel) table.getModel();
 				int modelRow = Integer.parseInt(e.getActionCommand());
 				
-				String teachingStatus = (String) table.getModel().getValueAt(modelRow, 6);
+				int lecturerId = (int) model.getValueAt(modelRow, 0);
+				String teachingStatus = (String) model.getValueAt(modelRow, 6);
 				String newStatus = (teachingStatus.equalsIgnoreCase("Active") ? "Not Active" : "Active");
-
-				( (DefaultTableModel) table.getModel() ).setValueAt(newStatus, modelRow, 6);
+						
+				int choice = JOptionPane.showConfirmDialog(null, "Set teachingStatus to '" + newStatus + "' for lecturer with id: '" + lecturerId + "' ?", "Confirm Update", JOptionPane.WARNING_MESSAGE);
+				if (choice != 0) return; // CANCEL
+				
+				lecturer = new Lecturer(lecturerId, newStatus);
+				if ( admin.updateLecturer(lecturer) ) { // Update successful
+					model.setValueAt(newStatus, modelRow, 6);
+				} else {
+					JOptionPane.showMessageDialog(null, "Cannot Update");
+				}
 			}
 		};
 		
@@ -473,13 +502,6 @@ public class AdminWindow extends JFrame {
 		scpLecturerList.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scpLecturerList.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		
-		mdlLecturerList.addRow(new Object[] {1, "Mathew", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Active"});
-		mdlLecturerList.addRow(new Object[] {2, "Mathew1", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Active"});
-		mdlLecturerList.addRow(new Object[] {3, "Mathew2", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Active"});
-		mdlLecturerList.addRow(new Object[] {4, "Mathew3", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Active"});
-		mdlLecturerList.addRow(new Object[] {5, "Mathew4", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Active"});
-		mdlLecturerList.addRow(new Object[] {6, "Mathew5", "Chan", "hdsmathew@gmail.com", "bdt", 57087019, "Not Active"});
-		
 		pnlAddLecturer = new JPanel(new GridBagLayout());
 		pnlAddLecturer.setBorder(BorderFactory.createTitledBorder(
 				BorderFactory.createBevelBorder(BevelBorder.LOWERED),
@@ -491,6 +513,7 @@ public class AdminWindow extends JFrame {
 		
 		jtfLectId = new JTextField(15);
 		jtfLectId.setFont(ROBOTO_PLAIN_SUB);
+		jtfLectId.setEditable(false);
 		jtfLectFname = new JTextField(15);
 		jtfLectFname.setFont(ROBOTO_PLAIN_SUB);
 		jtfLectLname = new JTextField(15);
@@ -501,6 +524,8 @@ public class AdminWindow extends JFrame {
 		jtfLectPhone.setFont(ROBOTO_PLAIN_SUB);
 		jtfLectAddr = new JTextField(15);
 		jtfLectAddr.setFont(ROBOTO_PLAIN_SUB);
+		jtfLectPassword = new JPasswordField(15);
+		jtfLectPassword.setFont(ROBOTO_PLAIN_SUB);
 		lblLectId = new JLabel("LecturerId");
 		lblLectId.setFont(ROBOTO_PLAIN_TITLE);
 		lblLectFname = new JLabel("First name");
@@ -513,6 +538,8 @@ public class AdminWindow extends JFrame {
 		lblLectPhone.setFont(ROBOTO_PLAIN_TITLE);
 		lblLectAddr = new JLabel("Address");
 		lblLectAddr.setFont(ROBOTO_PLAIN_TITLE);
+		lblLectPassword = new JLabel("Password");
+		lblLectPassword.setFont(ROBOTO_PLAIN_TITLE);
 		btnAddLect = new JButton("Add Lecturer");
 		btnAddLect.setFont(ROBOTO_PLAIN_TITLE);
 		
@@ -533,13 +560,15 @@ public class AdminWindow extends JFrame {
 		addGridBagComponent(pnlAddLecturer, lblLectEmail, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddLecturer, lblLectPhone, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddLecturer, lblLectAddr, 0, 5, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddLecturer, lblLectPassword, 0, 6, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddLecturer, jtfLectId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddLecturer, jtfLectFname, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddLecturer, jtfLectLname, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddLecturer, jtfLectEmail, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddLecturer, jtfLectPhone, 1, 4, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddLecturer, jtfLectAddr, 1, 5, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
-		addGridBagComponent(pnlAddLecturer, btnAddLect, 1, 6, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, jtfLectPassword, 1, 6, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddLecturer, btnAddLect, 1, 7, 1, 1, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH);
 
 		
 		pnlAssignLecturer = new JPanel(new GridBagLayout());
@@ -550,29 +579,14 @@ public class AdminWindow extends JFrame {
 				TitledBorder.ABOVE_TOP,
 				ROBOTO_BOLD_SUB)
 			);
-		
-		lecturerIds = new int[] {
-				1, 2, 3, 4, 5
-		};
-		courseCodes = new int[] {
-				1, 2, 3, 4, 5
-		};
 
-		lecturerNames = new String[] {
-				"Pava", "Vara", "Suda", "Nuja", "Sona"
-		};
-		courseNames = new String[] {
-				"CS", "IS", "SE", "AP", "DS"
-		};
-
-		
-		jcbAssignLectNames = new JComboBox<>(lecturerNames);
+		jcbAssignLectNames = new JComboBox<>();
 		jcbAssignLectNames.setFont(ROBOTO_PLAIN_SUB);
 		jcbAssignLectNames.setMaximumRowCount(5);
-		jcbAssignCourseNames = new JComboBox<>(courseNames);
+		jcbAssignCourseNames = new JComboBox<>();
 		jcbAssignCourseNames.setFont(ROBOTO_PLAIN_SUB);
 		jcbAssignCourseNames.setMaximumRowCount(5);
-		jcbAssignModuleNames = new JComboBox<>(courseNames);
+		jcbAssignModuleNames = new JComboBox<>();
 		jcbAssignModuleNames.setFont(ROBOTO_PLAIN_SUB);
 		jcbAssignModuleNames.setMaximumRowCount(5);
 		btnAssignLect = new JButton("Assign Module");
@@ -643,12 +657,11 @@ public class AdminWindow extends JFrame {
 				String offerStatus = (String) model.getValueAt(modelRow, 2);
 				String newStatus = (offerStatus.equalsIgnoreCase("Available") ? "Not Available" : "Available");
 				
-				course = new Course(courseCode, newStatus);
-				
 				int choice = JOptionPane.showConfirmDialog(null, "Set onOffer to '" + newStatus + "' for '" + courseName + "' ?", "Confirm Update", JOptionPane.WARNING_MESSAGE);
 				if (choice != 0) return; // CANCEL
 				
-				if ( course.update(admin.getUserConnection()) ) { // Update successful
+				course = new Course(courseCode, newStatus);
+				if ( admin.updateCourse(course) ) { // Update successful
 					model.setValueAt(newStatus, modelRow, 2);
 				} else {
 					JOptionPane.showMessageDialog(null, "Cannot Update");
@@ -895,22 +908,102 @@ public class AdminWindow extends JFrame {
 	
 	private void registerButtonListeners() {
 		
+		// Lecturer Card :: Add Lecturer
+		btnAddLect.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int lectId = Integer.parseInt(jtfLectId.getText());
+				String fname = jtfLectFname.getText();
+				String lname = jtfLectLname.getText();
+				String email = jtfLectEmail.getText();
+				String address = jtfLectAddr.getText();
+				String password = String.valueOf( jtfLectPassword.getPassword() );
+				int phoneNo = Integer.parseInt(jtfLectPhone.getText());
+
+				lecturer = new Lecturer(lectId, fname, lname, email, address, phoneNo, "Active", password);
+				
+				String message = "Cannot add lecturer";
+				if ( admin.addLecturer(lecturer) ) { // Insert Successful
+					message = "Lecturer Added";
+					mdlLecturerList.addRow( lecturer.getObjectInfo() );
+					initializeJTextFieldAndComboBox(LECTURER);
+				}
+				JOptionPane.showMessageDialog(null, message);
+			}
+		} );
+		
+		// Lecturer Card :: Show modules for selected Course
+		jcbAssignCourseNames.addItemListener( new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				
+				if (e.getStateChange() == ItemEvent.SELECTED) {
+					mdlCourseModuleNames = new DefaultComboBoxModel<>( courseModulesMap.get( (String) jcbAssignCourseNames.getSelectedItem() ) );
+					jcbAssignModuleNames.setModel(mdlCourseModuleNames);
+				}
+			}
+		} );
+		
+		// Lecturer Card :: Assign Lecturer to Module
+		btnAssignLect.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int lecturerId = lecturerNameIdMap.get( (String) jcbAssignLectNames.getSelectedItem() );
+				int moduleCode = moduleNameCodeMap.get ( (String) jcbAssignModuleNames.getSelectedItem() );
+				
+				// Read lecturer info
+				lecturer = new Lecturer(lecturerId);
+				lecturer.read(admin.getUserConnection());
+				
+				if ( !admin.assignModuleToLecturer(lecturer, moduleCode) ) {
+					JOptionPane.showMessageDialog(null, "Cannot assign module with code: " + moduleCode + " to lecturer woth id: " + lecturerId, "Invalid Assignment", JOptionPane.WARNING_MESSAGE);
+					return;
+				}
+				
+				JOptionPane.showMessageDialog(null, "Module Assigned");
+			}
+		} );
+		
+		// Registry Card :: Add Registry
+		btnAddRegistry.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int registryId = Integer.parseInt(jtfUserId.getText());
+				String fname = jtfFname.getText();
+				String lname = jtfLname.getText();
+				String email = jtfEmail.getText();
+				String password = String.valueOf( jtfPassword.getPassword() );
+				int phoneNo = Integer.parseInt(jtfPhone.getText());
+
+				registry = new Registry(registryId, fname, lname, phoneNo, email, password);
+				
+				String message = "Cannot add registry";
+				if ( admin.addRegistry(registry) ) { // Insert Successful
+					message = "Registry Added";
+					mdlRegistryList.addRow( registry.getObjectInfo() );
+					initializeJTextFieldAndComboBox(REGISTRY);
+				}
+				JOptionPane.showMessageDialog(null, message);
+			}
+		} );
+		
 		// Course Card :: Add Course
 		btnAddCourse.addActionListener( new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int courseCode;
-				String courseName;
+				String courseName = jtfCourseName.getText();
 				CourseModule[] modules = new CourseModule[3];
 				
-				courseCode = Integer.parseInt(jtfCourseCode.getText());
-				courseName = jtfCourseName.getText();
 				modules[0] = new CourseModule(jtfModuleName1.getText());
 				modules[1] = new CourseModule(jtfModuleName2.getText());
 				modules[2] = new CourseModule(jtfModuleName3.getText());
 				
-				course = new Course(courseCode, courseName, modules, "Available");
+				course = new Course(courseName, modules, "Available");
 				
 				String message = "Cannot add course";
 				if ( admin.addCourse(course) ) { // Insert Successful
@@ -941,7 +1034,7 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {				
 				String moduleSelected = (String) jcbSearchModuleNames.getSelectedItem();
-				int moduleCode = moduleCodeNameMap.get(moduleSelected);
+				int moduleCode = moduleNameCodeMap.get(moduleSelected);
 				module = new CourseModule( moduleCode, moduleSelected );
 				
 				String dateFromStr = jtfDateFrom.getText();
@@ -1053,10 +1146,48 @@ public class AdminWindow extends JFrame {
 	private void initializeJTextFieldAndComboBox(String command) {
 		switch (command) {
 			case REGISTRY:
+				jtfUserId.setText( Integer.toString( Registry.getNextAvailableUserId(admin.getUserConnection()) ) );
+				
+				jtfFname.setText("");
+				jtfLname.setText("");
+				jtfEmail.setText("");
+				jtfPhone.setText("");
+				jtfPassword.setText("");
 
 				break;
 				
 			case LECTURER:
+				jtfLectId.setText( Integer.toString( Lecturer.getNextAvailableLecturerId(admin.getUserConnection()) ) );
+				
+				jtfLectFname.setText("");
+				jtfLectLname.setText("");
+				jtfLectEmail.setText("");
+				jtfLectPhone.setText("");
+				jtfLectAddr.setText("");
+				
+				lecturers = Lecturer.readAll(admin.getUserConnection());
+				for (TableObjectInterface lecturer : lecturers) {
+					if ( !((Lecturer) lecturer).isActive() ) continue;
+					lecturerNameIdMap.put( ((Lecturer) lecturer).getFullName(), ((Lecturer) lecturer).getId() );
+				}
+				
+				mdlLecturerNames = new DefaultComboBoxModel<>( lecturerNameIdMap.keySet().toArray(new String[lecturerNameIdMap.size()]) );
+				jcbAssignLectNames.setModel(mdlLecturerNames);
+				
+				courses = Course.readAll(admin.getUserConnection());
+				for (TableObjectInterface course : courses) {
+					courseModulesMap.put( ((Course) course).getCourseName(), ((Course) course).getModuleNames());
+					
+					for (CourseModule m : ((Course) course).getModules()) {
+						moduleNameCodeMap.put( m.getModuleName(), m.getModuleCode() );
+					}
+				}
+				
+				mdlCourseNames = new DefaultComboBoxModel<>( courseModulesMap.keySet().toArray(new String[courseModulesMap.size()]) );
+				jcbAssignCourseNames.setModel(mdlCourseNames);
+				
+				mdlCourseModuleNames = new DefaultComboBoxModel<>( courseModulesMap.get( (String) jcbAssignCourseNames.getItemAt(0) ) );
+				jcbAssignModuleNames.setModel(mdlCourseModuleNames);
 
 				break;	
 				
@@ -1076,12 +1207,11 @@ public class AdminWindow extends JFrame {
 				
 			case ATTENDANCE:
 				courses = Course.readAll(admin.getUserConnection());
-				
 				for (TableObjectInterface course : courses) {
 					courseModulesMap.put( ((Course) course).getCourseName(), ((Course) course).getModuleNames());
 					
 					for (CourseModule m : ((Course) course).getModules()) {
-						moduleCodeNameMap.put( m.getModuleName(), m.getModuleCode() );
+						moduleNameCodeMap.put( m.getModuleName(), m.getModuleCode() );
 					}
 				}
 																
@@ -1117,11 +1247,11 @@ public class AdminWindow extends JFrame {
 				switch (command) {
 					case REGISTRY:
 						table = tblRegistryList;
-						objList = Course.readAll(admin.getUserConnection());
+						objList = Registry.readAll(admin.getUserConnection());
 						break;
 					case LECTURER:
 						table = tblLecturerList;
-						objList = Course.readAll(admin.getUserConnection());
+						objList = Lecturer.readAll(admin.getUserConnection());
 						break;	
 					case COURSE:
 						table = tblCourseList;

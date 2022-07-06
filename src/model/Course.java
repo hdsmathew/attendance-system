@@ -29,6 +29,12 @@ public class Course implements TableObjectInterface {
 		onOffer = o;
 	}
 	
+	public Course(String n, CourseModule[] m, String o) {
+		courseName  = n;
+		modules = m;
+		onOffer = o;
+	}
+	
 	public Course(int cc, String n, CourseModule[] m, String o) {
 		courseCode = cc;
 		courseName  = n;
