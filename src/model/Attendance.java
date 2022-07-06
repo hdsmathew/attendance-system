@@ -31,6 +31,10 @@ public class Attendance {
 		return date;
 	}
 	
+	public int getLecturerId() {
+		return lecturerId;
+	}
+	
 	public boolean getPresence() {
 		return present;
 	}

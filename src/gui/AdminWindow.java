@@ -16,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -61,6 +63,7 @@ public class AdminWindow extends JFrame {
 	private Admin admin;
 	private Registry registry;
 	private Lecturer lecturer;
+	private int lecturerId;
 	private Course course;
 	private CourseModule module;
 	private Student student;
@@ -222,7 +225,6 @@ public class AdminWindow extends JFrame {
 	
 	public AdminWindow(Admin user) {
 		super("Admin");
-		
 		admin = user;
 		
 		// Menu Panel
@@ -254,8 +256,24 @@ public class AdminWindow extends JFrame {
 		
 		registerButtonListeners();
 				
+		// Confirm exit and logout
+		addWindowListener( new WindowAdapter() {
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// Confirm exit
+				// 0 OK
+				// 2 CANCEL
+				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to close the application", "Confirm Exit", JOptionPane.WARNING_MESSAGE);
+				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
+				
+				admin.login();
+				System.exit(0);
+			}
+		} );
+		
 		add(pnlContent);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		pack();
 		setVisible(true);
 	}
@@ -347,7 +365,7 @@ public class AdminWindow extends JFrame {
 				// 0 OK
 				// 2 CANCEL
 				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete registry with id = " + registryId + "?", "Confirm Delete", JOptionPane.WARNING_MESSAGE);
-				if (choice != 0) return; // CANCEL
+				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
 				registry = new Registry(registryId);
 				
@@ -477,7 +495,7 @@ public class AdminWindow extends JFrame {
 				String newStatus = (teachingStatus.equalsIgnoreCase("Active") ? "Not Active" : "Active");
 						
 				int choice = JOptionPane.showConfirmDialog(null, "Set teachingStatus to '" + newStatus + "' for lecturer with id: '" + lecturerId + "' ?", "Confirm Update", JOptionPane.WARNING_MESSAGE);
-				if (choice != 0) return; // CANCEL
+				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
 				lecturer = new Lecturer(lecturerId, newStatus);
 				if ( admin.updateLecturer(lecturer) ) { // Update successful
@@ -658,7 +676,7 @@ public class AdminWindow extends JFrame {
 				String newStatus = (offerStatus.equalsIgnoreCase("Available") ? "Not Available" : "Available");
 				
 				int choice = JOptionPane.showConfirmDialog(null, "Set onOffer to '" + newStatus + "' for '" + courseName + "' ?", "Confirm Update", JOptionPane.WARNING_MESSAGE);
-				if (choice != 0) return; // CANCEL
+				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
 				course = new Course(courseCode, newStatus);
 				if ( admin.updateCourse(course) ) { // Update successful
@@ -1055,6 +1073,8 @@ public class AdminWindow extends JFrame {
 					attendances = Attendance.readAttendance(admin.getUserConnection(), module);
 				}
 				
+				lecturerId = attendances.get(0).getLecturerId();
+				
 				// Setting attendance for each date in same order as studentId
 				ArrayList<Boolean> presence;
 				moduleAttendancesColsData = new HashMap<>();
@@ -1091,7 +1111,7 @@ public class AdminWindow extends JFrame {
 			}
 		} );
 		
-		// Attendance Card :: Search Module attendances
+		// Attendance Card :: Search Student attendances
 		btnSearchStudentAttendance.addActionListener( new ActionListener() {
 			
 			@Override
@@ -1128,6 +1148,23 @@ public class AdminWindow extends JFrame {
 					for (i = 0; studentModules[i].getModuleCode() != a.getModule().getModuleCode(); i++);
 					mdlStudentAttendanceModules[i].addColumn(a.getDate(), new Boolean[] { a.getPresence() });
 				}
+			}
+		} );
+		
+		// Attendance Card :: Load Report
+		btnLoadReport.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Attendance not loaded in table yet, return;
+				if (tblModuleAttendanceList.getRowCount() == 0) return;
+				
+				String message = "Excel Report Cannot be created.";
+				if ( admin.loadReport(moduleAttendancesColsData, studentIds, studentNames, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
+					message = "Excel Report Created Successfully";
+				}
+				
+				JOptionPane.showMessageDialog(null, message);
 			}
 		} );
 		
@@ -1237,7 +1274,10 @@ public class AdminWindow extends JFrame {
 				// 0 OK
 				// 2 CANCEL
 				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "Confirm Logout", JOptionPane.WARNING_MESSAGE);
-				JOptionPane.showMessageDialog(null, "You chose " + choice, "Choice", JOptionPane.PLAIN_MESSAGE);
+				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
+				
+				admin.login();
+				// Show main window
 				
 			} else {
 				String command = e.getActionCommand();

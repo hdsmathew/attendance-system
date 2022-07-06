@@ -1,5 +1,25 @@
 package model;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Map;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+
 public class Admin extends User {
 	
 	public Admin(int userId, String password) {
@@ -35,5 +55,96 @@ public class Admin extends User {
 	
 	public boolean updateCourse(Course c) {
 		return c.update(this.conn);
+	}
+	
+	public boolean loadReport(Map<LocalDate, ArrayList<Boolean>> attendances, ArrayList<Integer> studentIds, ArrayList<String> studentNames, String moduleName, int lecturerId) {
+		// Reference: https://www.baeldung.com/java-microsoft-excel
+		
+		String excelSheetName = String.format("%s-lecturerId<%d>#%s", moduleName, lecturerId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+		
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet(excelSheetName);
+
+		Row header = sheet.createRow(0);
+
+		CellStyle headerStyle = workbook.createCellStyle();
+		headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+		headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		
+		XSSFFont font = ((XSSFWorkbook) workbook).createFont();
+		font.setFontName("Arial");
+		font.setFontHeightInPoints((short) 16);
+		font.setBold(true);
+		headerStyle.setFont(font);
+
+		Cell headerCell;
+		Cell cell;
+		Row row;
+		CellStyle style = workbook.createCellStyle();
+		style.setWrapText(true);
+
+		// Populate StudentId column
+		headerCell = header.createCell(0);
+		headerCell.setCellValue("studentId");
+		headerCell.setCellStyle(headerStyle);
+		sheet.setColumnWidth(0, 4000);
+
+		int rowNumber = 1;
+		int colNumber = 0;
+		for (int studentId : studentIds) {
+			row = sheet.createRow(rowNumber++);
+			cell = row.createCell(colNumber);
+			cell.setCellValue(studentId);
+			cell.setCellStyle(style);
+		}
+		
+		// Populate StudentName column
+		headerCell = header.createCell(1);
+		headerCell.setCellValue("studentName");
+		headerCell.setCellStyle(headerStyle);
+		sheet.setColumnWidth(1, 6000);
+
+		rowNumber = 1;
+		colNumber++;
+		for (String studentName : studentNames) {
+			row = sheet.getRow(rowNumber++);
+			cell = row.createCell(colNumber);
+			cell.setCellValue(studentName);
+			cell.setCellStyle(style);
+		}
+		
+		// Populate Attendances columns
+		colNumber++;
+		for (Map.Entry<LocalDate, ArrayList<Boolean>> entry : attendances.entrySet()) {
+			// Set attendance date
+			headerCell = header.createCell(colNumber);
+			headerCell.setCellValue(entry.getKey().toString());
+			headerCell.setCellStyle(headerStyle);
+			sheet.setColumnWidth(colNumber, 6000);
+			
+			// Set column date
+			rowNumber = 1;
+			for (boolean presence : entry.getValue()) {
+				row = sheet.getRow(rowNumber++);
+				cell = row.createCell(colNumber);
+				cell.setCellValue( (presence) ? "Present" : "Absent" );
+				cell.setCellStyle(style);
+			}
+			colNumber++;
+		}
+		
+		// Write to file
+		FileOutputStream outputStream;
+		try {
+			outputStream = new FileOutputStream("./" + excelSheetName + ".xlsx");
+			workbook.write(outputStream);
+			workbook.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
 	}
 }
