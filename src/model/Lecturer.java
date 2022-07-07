@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import config.Database;
+
 public class Lecturer extends User implements TableObjectInterface {
 	
 	private String fname;
@@ -16,6 +18,8 @@ public class Lecturer extends User implements TableObjectInterface {
 	private int phoneNo;
 	private String teachingStatus;
 	private ArrayList<CourseModule> modulesTaught;
+	
+	public Lecturer() {}
 	
 	public Lecturer(int userId) {
 		super(userId);
@@ -45,6 +49,29 @@ public class Lecturer extends User implements TableObjectInterface {
 		address = a;
 		phoneNo = p;
 		teachingStatus = s;
+	}
+	
+	@Override
+	public boolean login() {
+		super.conn = Database.getConnection();
+		
+		if (conn == null) return false;
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lecturer WHERE lectID = ?;");
+			stmt.setInt(1, super.userId);
+			ResultSet rs = stmt.executeQuery();
+			
+			if (!rs.next()) return false;
+			
+			String password = rs.getString("password");
+			return super.isPasswordValid(password);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 	
 	public int getId() {

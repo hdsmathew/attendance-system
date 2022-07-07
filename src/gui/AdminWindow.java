@@ -60,6 +60,8 @@ import model.TableObjectInterface;
 
 public class AdminWindow extends JFrame {
 	
+	private JFrame landingWindow;
+	
 	private Admin admin;
 	private Registry registry;
 	private Lecturer lecturer;
@@ -226,8 +228,9 @@ public class AdminWindow extends JFrame {
 	public JButton btnLoadReport;
 	public JButton btnLoadDefaulterList;
 	
-	public AdminWindow(Admin user) {
+	public AdminWindow(Admin user, JFrame frame) {
 		super("Admin");
+		landingWindow = frame;
 		admin = user;
 		
 		// Menu Panel
@@ -278,6 +281,7 @@ public class AdminWindow extends JFrame {
 		add(pnlContent);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		pack();
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 	
@@ -1339,7 +1343,8 @@ public class AdminWindow extends JFrame {
 				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
 				admin.logout();
-				// Show main window
+				landingWindow.setVisible(true);
+				dispose();
 				
 			} else {
 				String command = e.getActionCommand();

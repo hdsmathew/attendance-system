@@ -53,6 +53,8 @@ import model.TableObjectInterface;
 
 public class RegistryWindow extends JFrame {
 	
+	private JFrame landingWindow;
+	
 	private Registry registry;
 	private Student student;
 	
@@ -108,8 +110,9 @@ public class RegistryWindow extends JFrame {
 	public JButton search;
 	
 	
-	public RegistryWindow(Registry user) {
+	public RegistryWindow(Registry user, JFrame frame) {
 		super("Registry");
+		landingWindow = frame;
 		registry = user;
 		
 		//search part 
@@ -412,7 +415,7 @@ public class RegistryWindow extends JFrame {
 		} );
 		
 		add(pnlContent);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
@@ -516,7 +519,9 @@ public class RegistryWindow extends JFrame {
 				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
 				registry.logout();
-				// Show main window
+				landingWindow.setVisible(true);
+				dispose();
+				
 			} else {
 				populateTable(tblStudent, Student.readAll(registry.getUserConnection()));
 				initializeJTextFieldAndComboBox();

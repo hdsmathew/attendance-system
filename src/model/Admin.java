@@ -2,6 +2,9 @@ package model;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -18,11 +21,34 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import config.Database;
+
 
 public class Admin extends User {
 	
-	public Admin(int userId, String password) {
-		super(userId, password);
+	public Admin() {}
+	
+	@Override
+	public boolean login() {
+		super.conn = Database.getConnection();
+		
+		if (conn == null) return false;
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM administration WHERE id = ? AND type = 'admin';");
+			stmt.setInt(1, super.userId);
+			ResultSet rs = stmt.executeQuery();
+			
+			if (!rs.next()) return false;
+			
+			String password = rs.getString("password");
+			return super.isPasswordValid(password);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 	
 	public boolean addRegistry(Registry r) {
@@ -222,4 +248,5 @@ public class Admin extends User {
 		
 		return true;
 	}
+
 }

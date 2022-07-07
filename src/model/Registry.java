@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import config.Database;
+
 public class Registry extends User implements TableObjectInterface {
 	
 	private String fname;
@@ -14,12 +16,10 @@ public class Registry extends User implements TableObjectInterface {
 	private int phoneNo;
 	private String email;
 	
+	public Registry() {}
+	
 	public Registry(int userId) {
 		super(userId);
-	}
-	
-	public Registry(int userId, String password) {
-		super(userId, password);
 	}
 	
 	public Registry(int userId, String f, String l, int p, String e, String password) {
@@ -36,6 +36,29 @@ public class Registry extends User implements TableObjectInterface {
 		lname = l;
 		phoneNo = p;
 		email = e;
+	}
+	
+	@Override
+	public boolean login() {
+		super.conn = Database.getConnection();
+		
+		if (conn == null) return false;
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM administration WHERE id = ? AND type = 'registry';");
+			stmt.setInt(1, super.userId);
+			ResultSet rs = stmt.executeQuery();
+			
+			if (!rs.next()) return false;
+			
+			String password = rs.getString("password");
+			return super.isPasswordValid(password);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
 	}
 	
 	public String toString() {

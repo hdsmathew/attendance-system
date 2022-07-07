@@ -1,12 +1,10 @@
 package model;
 
-import config.Database;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 
 
-public class User {
+public abstract class User {
 	protected int userId;
 	protected String password;
 	protected Connection conn;
@@ -25,11 +23,19 @@ public class User {
 		conn = null;
 	}
 	
-	public boolean login() {
-		conn = Database.getConnection();
-		
-		return ( conn != null );
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
+	
+	public void setPassword(String password ) {
+		this.password = password;
+	}
+	
+	public boolean isPasswordValid(String p) {
+		return this.password.equals(p);
+	}
+	
+	public abstract boolean login();
 	
 	public boolean logout() {
 		
