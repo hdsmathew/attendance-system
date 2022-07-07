@@ -20,7 +20,7 @@ CREATE TABLE `administration` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `administration` (`id`, `fname`, `lname`, `password`, `phoneNo`, `type`, `email`) VALUES
-(1, 'Mathew', 'mat', '1234', 57087019, 'admin', 'mat@gmail.com'),
+(1, 'Mathew', 'mat', '1234', 1234567, 'admin', 'mat@gmail.com'),
 (2, 'Headrick', 'hds', '1234', 58078091, 'registry', 'hds@gmail.com');
 
 CREATE TABLE `attendance` (
