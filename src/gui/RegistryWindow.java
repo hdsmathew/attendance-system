@@ -276,10 +276,7 @@ public class RegistryWindow extends JFrame {
 		//label for course
 		lblcourse = new JLabel("Course");
 		lblcourse.setFont(ROBOTO_PLAIN_TITLE);
-	
-		
-		//array to store values in course
-		
+			
 		Coursecombo = new JComboBox<String>();
 		
 		GridBagConstraints gc = new GridBagConstraints();
