@@ -146,4 +146,80 @@ public class Admin extends User {
 		
 		return true;
 	}
+	
+	public boolean loadDefaultersList(Map<Integer, ArrayList<LocalDate>> defaulterDatesAbsentMap, Map<Integer, String> defaulterIdNameMap, String moduleName, int lecturerId) {
+		// Reference: https://www.baeldung.com/java-microsoft-excel
+		
+		String excelSheetName = String.format("Defaulters-%s-lecturerId<%d>#%s", moduleName, lecturerId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+		
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheet = workbook.createSheet(excelSheetName);
+
+		Row header = sheet.createRow(0);
+
+		CellStyle headerStyle = workbook.createCellStyle();
+		headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+		headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		
+		XSSFFont font = ((XSSFWorkbook) workbook).createFont();
+		font.setFontName("Arial");
+		font.setFontHeightInPoints((short) 16);
+		font.setBold(true);
+		headerStyle.setFont(font);
+
+		Cell headerCell;
+		Cell cell;
+		Row row;
+		CellStyle style = workbook.createCellStyle();
+		style.setWrapText(true);
+
+		headerCell = header.createCell(0);
+		headerCell.setCellValue("studentId");
+		headerCell.setCellStyle(headerStyle);
+		sheet.setColumnWidth(0, 4000);
+		
+		headerCell = header.createCell(1);
+		headerCell.setCellValue("studentName");
+		headerCell.setCellStyle(headerStyle);
+		sheet.setColumnWidth(1, 6000);
+
+		int rowNumber = 1;
+		int colNumber;
+		for (Map.Entry<Integer, ArrayList<LocalDate>> entry : defaulterDatesAbsentMap.entrySet()) {
+			row = sheet.createRow(rowNumber++);
+			
+			// Student Id
+			colNumber = 0;
+			cell = row.createCell(colNumber++);
+			cell.setCellValue(entry.getKey());
+			cell.setCellStyle(style);
+			
+			// Student Name
+			cell = row.createCell(colNumber++);
+			cell.setCellValue(defaulterIdNameMap.get(entry.getKey()));
+			cell.setCellStyle(style);
+			
+			// Dates Absent
+			for (LocalDate dateAbsent : entry.getValue()) {
+				sheet.setColumnWidth(colNumber, 6000);
+				cell = row.createCell(colNumber++);
+				cell.setCellValue(dateAbsent.toString());
+				cell.setCellStyle(style);
+			}
+		}
+		
+		// Write to file
+		FileOutputStream outputStream;
+		try {
+			outputStream = new FileOutputStream("./" + excelSheetName + ".xlsx");
+			workbook.write(outputStream);
+			workbook.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		return true;
+	}
 }

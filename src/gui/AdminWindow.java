@@ -75,6 +75,8 @@ public class AdminWindow extends JFrame {
 	private ArrayList<String> studentNames;
 	private CourseModule[] studentModules;
 	
+	private Map<Integer, String> defaultersIdNameMap = new HashMap<>();
+	private Map<Integer, ArrayList<LocalDate>> defaultersDateAbsentMap;
 	private Map<LocalDate, ArrayList<Boolean>> moduleAttendancesColsData;
 	private Map<String, String[]> courseModulesMap = new HashMap<>();
 	private Map<String, Integer> moduleNameCodeMap = new HashMap<>();
@@ -222,6 +224,7 @@ public class AdminWindow extends JFrame {
 	public JButton btnSearchStudentAttendance;
 	public JButton btnSearchModuleAttendance;
 	public JButton btnLoadReport;
+	public JButton btnLoadDefaulterList;
 	
 	public AdminWindow(Admin user) {
 		super("Admin");
@@ -792,6 +795,8 @@ public class AdminWindow extends JFrame {
 		btnDateTo.setFont(ROBOTO_PLAIN_SUB);
 		btnLoadReport = new JButton("Load Report");
 		btnLoadReport.setFont(ROBOTO_PLAIN_TITLE);
+		btnLoadDefaulterList = new JButton("Load Defaulter List");
+		btnLoadDefaulterList.setFont(ROBOTO_PLAIN_TITLE);
 		
 		btnDateFrom.addActionListener(new ActionListener() {
 			
@@ -821,6 +826,8 @@ public class AdminWindow extends JFrame {
 		
 		
 		boxBtnLoadReport.add(Box.createHorizontalGlue());
+		boxBtnLoadReport.add(btnLoadDefaulterList);
+		boxBtnLoadReport.add(Box.createHorizontalStrut(14));
 		boxBtnLoadReport.add(btnLoadReport);
 		
 		tblModuleAttendanceList = new JTable() {
@@ -1075,19 +1082,35 @@ public class AdminWindow extends JFrame {
 				
 				lecturerId = attendances.get(0).getLecturerId();
 				
-				// Setting attendance for each date in same order as studentId
 				ArrayList<Boolean> presence;
+				ArrayList<LocalDate> datesAbsent;
 				moduleAttendancesColsData = new HashMap<>();
+				defaultersDateAbsentMap = new HashMap<>();
+				defaultersIdNameMap = new HashMap<>();
 				for (Attendance a : attendances) {
 					
+					// Setting attendance for each date in same order as studentId
 					if (!moduleAttendancesColsData.containsKey(a.getDate())) {
 						moduleAttendancesColsData.put(a.getDate(), new ArrayList<>());
 					}
 					
 					presence = moduleAttendancesColsData.get(a.getDate());
 					presence.add(a.getPresence());
-					
 					moduleAttendancesColsData.put(a.getDate(), presence);
+					
+					// Setting defaulter-dates absent map
+					if (a.getPresence()) continue; // Present
+					
+					int studentId = a.getStudent().getStudentId();
+					
+					if (!defaultersDateAbsentMap.containsKey(studentId)) {
+						defaultersDateAbsentMap.put(studentId, new ArrayList<>());
+						defaultersIdNameMap.put(studentId, a.getStudent().getStudentName());
+					}
+					
+					datesAbsent = defaultersDateAbsentMap.get(studentId);
+					datesAbsent.add(a.getDate());
+					defaultersDateAbsentMap.put(studentId, datesAbsent);
 				}
 				
 				// Retrieving student names and ids
@@ -1157,10 +1180,34 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Attendance not loaded in table yet, return;
-				if (tblModuleAttendanceList.getRowCount() == 0) return;
+				if (tblModuleAttendanceList.getRowCount() == 0) {
+					JOptionPane.showMessageDialog(null, "Search Module Attendance First");
+					return;
+				}
 				
 				String message = "Excel Report Cannot be created.";
 				if ( admin.loadReport(moduleAttendancesColsData, studentIds, studentNames, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
+					message = "Excel Report Created Successfully";
+				}
+				
+				JOptionPane.showMessageDialog(null, message);
+			}
+		} );
+		
+		// Attendance Card :: Load Defaulter List
+		btnLoadDefaulterList.addActionListener( new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// Attendance not loaded in table yet, return;
+				if (tblModuleAttendanceList.getRowCount() == 0) {
+					JOptionPane.showMessageDialog(null, "Search Module Attendance First");
+					return;
+				}
+				
+				
+				String message = "Excel Report Cannot be created.";
+				if ( admin.loadDefaultersList(defaultersDateAbsentMap, defaultersIdNameMap, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
 					message = "Excel Report Created Successfully";
 				}
 				
