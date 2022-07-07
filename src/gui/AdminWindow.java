@@ -126,13 +126,13 @@ public class AdminWindow extends JFrame {
 	public JScrollPane scpRegistryList;
 	public DefaultTableModel mdlRegistryList;
 	public String[] registryCols;
-	public JTextField jtfRegistryId;
+	public JTextField jtfUserId;
 	public JTextField jtfFname;
 	public JTextField jtfLname;
 	public JTextField jtfEmail;
 	public JTextField jtfPhone;
 	public JPasswordField jtfPassword;
-	public JLabel lblRegistryId;
+	public JLabel lblUserId;
 	public JLabel lblFname;
 	public JLabel lblLname;
 	public JLabel lblEmail;
@@ -270,7 +270,7 @@ public class AdminWindow extends JFrame {
 				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to close the application", "Confirm Exit", JOptionPane.WARNING_MESSAGE);
 				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
-				admin.logout();
+				admin.login();
 				System.exit(0);
 			}
 		} );
@@ -404,9 +404,9 @@ public class AdminWindow extends JFrame {
 				ROBOTO_BOLD_SUB)
 			);
 		
-		jtfRegistryId = new JTextField(15);
-		jtfRegistryId.setFont(ROBOTO_PLAIN_SUB);
-		jtfRegistryId.setEditable(false);
+		jtfUserId = new JTextField(15);
+		jtfUserId.setFont(ROBOTO_PLAIN_SUB);
+		jtfUserId.setEditable(false);
 		jtfFname = new JTextField(15);
 		jtfFname.setFont(ROBOTO_PLAIN_SUB);
 		jtfLname = new JTextField(15);
@@ -417,8 +417,8 @@ public class AdminWindow extends JFrame {
 		jtfPhone.setFont(ROBOTO_PLAIN_SUB);
 		jtfPassword = new JPasswordField(15);
 		jtfPassword.setFont(ROBOTO_PLAIN_SUB);
-		lblRegistryId = new JLabel("RegistryId");
-		lblRegistryId.setFont(ROBOTO_PLAIN_TITLE);
+		lblUserId = new JLabel("UserId");
+		lblUserId.setFont(ROBOTO_PLAIN_TITLE);
 		lblFname = new JLabel("fname");
 		lblFname.setFont(ROBOTO_PLAIN_TITLE);
 		lblLname = new JLabel("lname");
@@ -435,13 +435,13 @@ public class AdminWindow extends JFrame {
 		gc = new GridBagConstraints();
 		
 		
-		addGridBagComponent(pnlAddRegistry, lblRegistryId, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
+		addGridBagComponent(pnlAddRegistry, lblUserId, 0, 0, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, lblFname, 0, 1, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, lblLname, 0, 2, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, lblEmail, 0, 3, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, lblPhone, 0, 4, GridBagConstraints.EAST, GridBagConstraints.NONE);
 		addGridBagComponent(pnlAddRegistry, lblPassword, 0, 5, GridBagConstraints.EAST, GridBagConstraints.NONE);
-		addGridBagComponent(pnlAddRegistry, jtfRegistryId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
+		addGridBagComponent(pnlAddRegistry, jtfUserId, 1, 0, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, jtfFname, 1, 1, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, jtfLname, 1, 2, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
 		addGridBagComponent(pnlAddRegistry, jtfEmail, 1, 3, 2, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH);
@@ -867,7 +867,7 @@ public class AdminWindow extends JFrame {
 		
 		jtfSearchStudent = new JTextField(7);
 		jtfSearchStudent.setFont(ROBOTO_PLAIN_SUB);
-		lblSearchStudent = new JLabel("Student Id/Name:");
+		lblSearchStudent = new JLabel("Student Id:");
 		lblSearchStudent.setFont(ROBOTO_PLAIN_TITLE);
 		btnSearchStudentAttendance = new JButton("Search Student Attendance");
 		btnSearchStudentAttendance.setFont(ROBOTO_PLAIN_TITLE);
@@ -899,7 +899,7 @@ public class AdminWindow extends JFrame {
 			tblStudentAttendanceModules[i].setRowHeight(30);
 			tblStudentAttendanceModules[i].setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			tblStudentAttendanceModules[i].setFillsViewportHeight(true);
-			tblStudentAttendanceModules[i].setPreferredScrollableViewportSize(new Dimension(1000, 100));
+			tblStudentAttendanceModules[i].setPreferredScrollableViewportSize(new Dimension(1000, 300));
 			
 			scpStudentAttendanceModules[i] = new JScrollPane(tblStudentAttendanceModules[i]);
 			scpStudentAttendanceModules[i].setBorder(BorderFactory.createTitledBorder(
@@ -997,7 +997,7 @@ public class AdminWindow extends JFrame {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				int registryId = Integer.parseInt(jtfRegistryId.getText());
+				int registryId = Integer.parseInt(jtfUserId.getText());
 				String fname = jtfFname.getText();
 				String lname = jtfLname.getText();
 				String email = jtfEmail.getText();
@@ -1140,20 +1140,13 @@ public class AdminWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String studentIdStr = jtfSearchStudent.getText();
+				
 				if (studentIdStr.isEmpty()) return;
 				
-				boolean searchById = true;
-				try {
-					student = new Student( Integer.parseInt(studentIdStr) );
-					
-				} catch (NumberFormatException ex) {
-					// Search by name
-					student = new Student( studentIdStr );
-					searchById = false;
-				}
+				student = new Student( Integer.parseInt(studentIdStr) );
 				
-				if ( !student.read(admin.getUserConnection(), searchById) ) { // Invalid id
-					JOptionPane.showMessageDialog(null,  "Student Not Found");
+				if ( !student.read(admin.getUserConnection()) ) { // Invalid id
+					JOptionPane.showMessageDialog(null,  "Invalid Student Id", "Invalid Id", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				
@@ -1163,15 +1156,7 @@ public class AdminWindow extends JFrame {
 								
 				// Initialise first and second columns
 				for (int i = 0; i < 3; i++) {
-					scpStudentAttendanceModules[i].setBorder(BorderFactory.createTitledBorder(
-							BorderFactory.createBevelBorder(BevelBorder.LOWERED),
-							studentModules[i].getModuleName() + " Attendance",
-							TitledBorder.LEFT,
-							TitledBorder.ABOVE_TOP,
-							ROBOTO_BOLD_SUB)
-						);
-					
-					mdlStudentAttendanceModules[i] = new DefaultTableModel();					
+					mdlStudentAttendanceModules[i] = new DefaultTableModel();
 					mdlStudentAttendanceModules[i].addColumn("moduleCode", new Integer[] { studentModules[i].getModuleCode() });
 					mdlStudentAttendanceModules[i].addColumn("moduleName", new String[] { studentModules[i].getModuleName() });
 
@@ -1245,7 +1230,7 @@ public class AdminWindow extends JFrame {
 	private void initializeJTextFieldAndComboBox(String command) {
 		switch (command) {
 			case REGISTRY:
-				jtfRegistryId.setText( Integer.toString( Registry.getNextAvailableUserId(admin.getUserConnection()) ) );
+				jtfUserId.setText( Integer.toString( Registry.getNextAvailableUserId(admin.getUserConnection()) ) );
 				
 				jtfFname.setText("");
 				jtfLname.setText("");
@@ -1338,7 +1323,7 @@ public class AdminWindow extends JFrame {
 				int choice = JOptionPane.showConfirmDialog(null, "Are you sure you want to logout?", "Confirm Logout", JOptionPane.WARNING_MESSAGE);
 				if (choice != JOptionPane.OK_OPTION) return; // CANCEL
 				
-				admin.logout();
+				admin.login();
 				// Show main window
 				
 			} else {

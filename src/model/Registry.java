@@ -47,14 +47,6 @@ public class Registry extends User implements TableObjectInterface {
 		return new Object[] {super.userId, fname + " " + lname, email, phoneNo, "Delete"};
 	}
 	
-	public boolean addStudent(Student s) {
-		return s.add(this.conn);
-	}
-	
-	public boolean dropStudent(Student s) {
-		return s.update(this.conn);
-	}
-	
 	public boolean add(Connection conn) {
 		
 		try {

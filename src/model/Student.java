@@ -23,10 +23,6 @@ public class Student implements TableObjectInterface {
 		studentId = id;
 	}
 	
-	public Student(String searchName) {
-		this.fname = searchName;
-	}
-	
 	public Student(int id, String fname, String lname) {
 		studentId = id;
 		this.fname = fname;
@@ -58,27 +54,17 @@ public class Student implements TableObjectInterface {
 	
 	@Override
 	public Object[] getObjectInfo() {
-		return new Object[] {studentId, fname, lname, address, email, phoneNo, courseCode, enrollDate, "Drop"};
+		return new Object[] {studentId, fname, lname, address, email, phoneNo, courseCode, enrollDate};
 	}
 	
-	public boolean read(Connection conn, boolean searchById) {
+	public boolean read(Connection conn) {
 		
 		try {
-			PreparedStatement stmt;
-			
-			if (searchById) {
-				stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE s.studentID = ? AND active = 1;");
-				stmt.setInt(1, this.studentId);
-			} else {
-				stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE (CONCAT(s.fname, ' ', s.lname) LIKE ?) OR (CONCAT(s.lname, ' ', s.fname) LIKE ?) AND active = 1 LIMIT 1;");
-				stmt.setString(1, "%" + this.fname + "%");
-				stmt.setString(2, "%" + this.fname + "%");
-			}
-			
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE s.studentID = ? AND active = 1;");
+			stmt.setInt(1, this.studentId);
 			ResultSet rs = stmt.executeQuery();
 			
 			if (rs.next()) {
-				this.studentId = rs.getInt("studentID");
 				this.fname = rs.getString("fname");
 				this.lname = rs.getString("lname");
 				this.address = rs.getString("address");
@@ -100,7 +86,7 @@ public class Student implements TableObjectInterface {
 	public boolean add(Connection conn) {
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("INSERT INTO student (fname, lname, address, phoneNo, email) VALUES (?, ?, ?, ?, ?);");
+			PreparedStatement stmt = conn.prepareStatement("INSERT INTO student (fname, lname, address, phoneNo, email) VALUES (?, ?, ?, ?, ?):");
 			stmt.setString(1, this.fname);
 			stmt.setString(2, this.lname);
 			stmt.setString(3, this.address);
@@ -139,7 +125,7 @@ public class Student implements TableObjectInterface {
 		ArrayList<TableObjectInterface> students = new ArrayList<>();
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student s INNER JOIN enrollment e ON s.studentID = e.studentID WHERE active = 1;");
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM student WHERE active = 1;");
 			ResultSet rs = stmt.executeQuery();
 			
 			while (rs.next()) {
@@ -177,7 +163,7 @@ public class Student implements TableObjectInterface {
 		
 		try {
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT MAX(studentID) AS studentId FROM student;");
+			ResultSet rs = stmt.executeQuery("SELECT MAX(studentID) AS studentId FROM student");
 			if (rs.next()) {
 				nextStudentId = (rs.getInt("studentId")) + 1;				
 			}
