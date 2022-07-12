@@ -97,7 +97,6 @@ public class LoginWindow extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				User user = null;
-				JFrame nextWindow;
 				
 				int userId = Integer.parseInt( id.getText() );
 				String passwordStr = String.valueOf( password.getPassword() );
@@ -123,6 +122,8 @@ public class LoginWindow extends JFrame {
 					JOptionPane.showMessageDialog(null, "Invalid Credential", "Login Error", JOptionPane.WARNING_MESSAGE);
 					return;
 				}
+
+				setVisible(false);
 				
 				switch (userType) {
 				case LandingWindow.ADMIN:
@@ -132,11 +133,12 @@ public class LoginWindow extends JFrame {
 					new RegistryWindow( (Registry) user, LoginWindow.this.landingWindow );
 					break;
 				case LandingWindow.LECTURER:
-					new AdminWindow( (Admin) user, LoginWindow.this.landingWindow );
+					new LecturerWindow( (Lecturer) user, LoginWindow.this.landingWindow );
 					break;
 				default:
 					break;
 				}
+				
 				dispose();
 			}
 		} );

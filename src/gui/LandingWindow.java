@@ -133,7 +133,7 @@ public class LandingWindow extends JFrame{
 	public class MyHandler implements ActionListener{
 		public void actionPerformed(ActionEvent ac) {
 			String titlePassed = ac.getActionCommand();
-			LoginWindow loginWindow = new LoginWindow(titlePassed, LandingWindow.this);
+			loginWindow = new LoginWindow(titlePassed, LandingWindow.this);
 			
 			setVisible(false);
 			loginWindow.setVisible(true);
