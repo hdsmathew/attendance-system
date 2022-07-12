@@ -61,53 +61,51 @@ public class RegistryWindow extends JFrame {
 	private ArrayList<TableObjectInterface> courses;
 	private Map<String, Integer> courseNameCodeMap = new HashMap<>();
 	
-	public static final String STUDENT = "Student";
-	public static final String LOGOUT = "Logout";
+	private static final String STUDENT = "Student";
+	private static final String LOGOUT = "Logout";
 	
-	public static final Font ROBOTO_BOLD_TITLE = new Font("roboto", Font.BOLD, 20);
-	public static final Font ROBOTO_BOLD_SUB = new Font("roboto", Font.BOLD, 16);
-	public static final Font ROBOTO_PLAIN_TITLE = new Font("roboto", Font.PLAIN, 16);
-	public static final Font ROBOTO_PLAIN_SUB = new Font("roboto", Font.PLAIN, 14);
+	private static final Font ROBOTO_BOLD_TITLE = new Font("roboto", Font.BOLD, 20);
+	private static final Font ROBOTO_BOLD_SUB = new Font("roboto", Font.BOLD, 16);
+	private static final Font ROBOTO_PLAIN_TITLE = new Font("roboto", Font.PLAIN, 16);
+	private static final Font ROBOTO_PLAIN_SUB = new Font("roboto", Font.PLAIN, 14);
 
-	public JPanel pnlContent;
-	public JPanel pnlMenu;
-	public JPanel pnlDate;
-	public JPanel pnlCards;
-	public JPanel pnlCardStudent;
+	private JPanel pnlContent;
+	private JPanel pnlMenu;
+	private JPanel pnlDate;
+	private JPanel pnlCards;
+	private JPanel pnlCardStudent;
 
-	public LocalDate today;
-	public JLabel lblDate;
-	public JLabel lblDay;
+	private LocalDate today;
+	private JLabel lblDate;
+	private JLabel lblDay;
 	
-	public JButton[] btnsMenu = new JButton[2];
-	public JButton btnStudent;
-	public JButton btnLogout;
+	private JButton[] btnsMenu = new JButton[2];
+	private JButton btnLogout;
 	
 	// Registry Components
-	public JPanel pnlAddStudent;
-	public JPanel pnlStudent;
-	public JTable tblStudent;
-	public JScrollPane scpStudent;
-	public DefaultTableModel mdlStudent;
-	public String[] StudentCols;
-	public JTextField jtfStudentId;
-	public JTextField jtfSurname,jtfUseraddress;
-	public JTextField jtfName;
-	public JTextField jtfEmail;
-	public JTextField jtfPhone;
-	public JPasswordField jtfPassword;
-	public JLabel lblStudentId;
-	public JLabel lblSurname,lblUseraddress;
-	public JLabel lblName;
-	public JLabel lblEmail;
-	public JLabel lblPhone;
-	public JLabel lblPassword;
-	public JLabel lblcourse;
-	public JButton btnAdd;
-	public JComboBox<String> Coursecombo;
-	public JPanel pnlSearchtop;
-	public JTextField searchStud;
-	public JButton search;
+	private JPanel pnlAddStudent;
+	private JTable tblStudent;
+	private JScrollPane scpStudent;
+	private DefaultTableModel mdlStudent;
+	private String[] StudentCols;
+	private JTextField jtfStudentId;
+	private JTextField jtfSurname,jtfUseraddress;
+	private JTextField jtfName;
+	private JTextField jtfEmail;
+	private JTextField jtfPhone;
+	private JPasswordField jtfPassword;
+	private JLabel lblStudentId;
+	private JLabel lblSurname,lblUseraddress;
+	private JLabel lblName;
+	private JLabel lblEmail;
+	private JLabel lblPhone;
+	private JLabel lblPassword;
+	private JLabel lblcourse;
+	private JButton btnAdd;
+	private JComboBox<String> Coursecombo;
+	private JPanel pnlSearchtop;
+	private JTextField searchStud;
+	private JButton search;
 	
 	
 	public RegistryWindow(Registry user, JFrame frame) {
@@ -125,6 +123,7 @@ public class RegistryWindow extends JFrame {
 		search.setFont(ROBOTO_PLAIN_TITLE);
 		pnlSearchtop.add(searchStud);
 		pnlSearchtop.add(search);
+		
 		// Menu Panel
 		pnlMenu = new JPanel(new GridLayout(0, 1));
 		pnlMenu.setBackground(new Color(2, 24, 28));
@@ -142,7 +141,7 @@ public class RegistryWindow extends JFrame {
 		pnlMenu.add(pnlDate);
 
 		// Menu Items
-		btnsMenu[0] = btnStudent = new JButton(STUDENT);
+		btnsMenu[0] = new JButton(STUDENT);
 		btnsMenu[1] = btnLogout = new JButton(LOGOUT);
 
 		for (JButton btnMenu : btnsMenu) {

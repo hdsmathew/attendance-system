@@ -104,7 +104,7 @@ public class Registry extends User implements TableObjectInterface {
 			stmt.executeUpdate();
 			
 			stmt = conn.prepareStatement("ALTER TABLE administration AUTO_INCREMENT = ?;");
-			stmt.setInt(1, Registry.getNextAvailableUserId(conn));
+			stmt.setInt(1, Registry.getNextAvailableRegistryId(conn));
 			stmt.executeUpdate();
 						
 		} catch (SQLException e) {
@@ -133,7 +133,7 @@ public class Registry extends User implements TableObjectInterface {
 		return registry;
 	}
 	
-	public static int getNextAvailableUserId(Connection conn) {
+	public static int getNextAvailableRegistryId(Connection conn) {
 		int nextUserId = 1;
 		
 		try {
