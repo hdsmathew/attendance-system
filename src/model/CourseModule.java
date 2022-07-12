@@ -10,7 +10,6 @@ import java.util.ArrayList;
 public class CourseModule {
 	private int moduleCode;
 	private String moduleName;
-	private int courseCode;
 	
 	public CourseModule(int mc) {
 		moduleCode = mc;
@@ -25,12 +24,6 @@ public class CourseModule {
 		moduleName = n;
 	}
 	
-	public CourseModule(int mc, String n, int cc) {
-		moduleCode = mc;
-		moduleName = n;
-		courseCode = cc;
-	}
-	
 	public int getModuleCode() {
 		return moduleCode;
 	}
@@ -38,11 +31,7 @@ public class CourseModule {
 	public String getModuleName() {
 		return moduleName;
 	}
-	
-	public int getCourseCode() {
-		return courseCode;
-	}
-	
+
 	public static ArrayList<CourseModule> readAll(Connection conn) {
 		ArrayList<CourseModule> modules = new ArrayList<>();
 		

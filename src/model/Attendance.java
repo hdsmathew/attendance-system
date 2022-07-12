@@ -65,6 +65,21 @@ public class Attendance {
 		}
 	}
 	
+	public static boolean isAttendanceAlreadyTaken(Connection conn, int moduleCode) {
+		
+		try {
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM attendance WHERE moduleCode = ? AND date = CURDATE();");
+			stmt.setInt(1, moduleCode);
+			
+			// Return true if attendance already taken; otherwise false
+			return stmt.executeQuery().next();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
 	public static ArrayList<Attendance> readAttendance(Connection conn, Student s) {
 		ArrayList<Attendance> attendances = new ArrayList<>();
 		

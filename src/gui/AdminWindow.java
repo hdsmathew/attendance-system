@@ -87,146 +87,134 @@ public class AdminWindow extends JFrame {
 	private DefaultComboBoxModel<String> mdlCourseNames;
 	private DefaultComboBoxModel<String> mdlCourseModuleNames;
 	
-	public static final String REGISTRY = "Registry";
-	public static final String LECTURER = "Lecturer";
-	public static final String COURSE = "Course";
-	public static final String ATTENDANCE = "Attendance";
-	public static final String LOGOUT = "Logout";
+	private static final String REGISTRY = "Registry";
+	private static final String LECTURER = "Lecturer";
+	private static final String COURSE = "Course";
+	private static final String ATTENDANCE = "Attendance";
+	private static final String LOGOUT = "Logout";
 	
-	public static final Font ROBOTO_BOLD_TITLE = new Font("roboto", Font.BOLD, 20);
-	public static final Font ROBOTO_BOLD_SUB = new Font("roboto", Font.BOLD, 16);
-	public static final Font ROBOTO_PLAIN_TITLE = new Font("roboto", Font.PLAIN, 16);
-	public static final Font ROBOTO_PLAIN_SUB = new Font("roboto", Font.PLAIN, 14);
+	private static final Font ROBOTO_BOLD_TITLE = new Font("roboto", Font.BOLD, 20);
+	private static final Font ROBOTO_BOLD_SUB = new Font("roboto", Font.BOLD, 16);
+	private static final Font ROBOTO_PLAIN_TITLE = new Font("roboto", Font.PLAIN, 16);
+	private static final Font ROBOTO_PLAIN_SUB = new Font("roboto", Font.PLAIN, 14);
 	
-	public JPanel pnlContent;
-	public JPanel pnlMenu;
-	public JPanel pnlDate;
-	public JPanel pnlCards;
-	public JPanel pnlCardRegistry;
-	public JPanel pnlCardLecturer;
-	public JPanel pnlCardCourse;
-	public JPanel pnlCardAttendance;
+	private JPanel pnlContent;
+	private JPanel pnlMenu;
+	private JPanel pnlDate;
+	private JPanel pnlCards;
+	private JPanel pnlCardRegistry;
+	private JPanel pnlCardLecturer;
+	private JPanel pnlCardCourse;
+	private JPanel pnlCardAttendance;
 
 	
-	public LocalDate today;
-	public JLabel lblDate;
-	public JLabel lblDay;
+	private LocalDate today;
+	private JLabel lblDate;
+	private JLabel lblDay;
 	
-	public JButton[] btnsMenu = new JButton[5];
-	public JButton btnRegistry;
-	public JButton btnLecturer;
-	public JButton btnCourse;
-	public JButton btnAttendance;
-	public JButton btnLogout;
+	private JButton[] btnsMenu = new JButton[5];
+	private JButton btnAttendance;
+	private JButton btnLogout;
 	
-	public GridBagConstraints gc;
+	private GridBagConstraints gc;
 	
 	// Registry Components
-	public JPanel pnlAddRegistry;
-	public JPanel pnlRegistryList;
-	public JTable tblRegistryList;
-	public JScrollPane scpRegistryList;
-	public DefaultTableModel mdlRegistryList;
-	public String[] registryCols;
-	public JTextField jtfRegistryId;
-	public JTextField jtfFname;
-	public JTextField jtfLname;
-	public JTextField jtfEmail;
-	public JTextField jtfPhone;
-	public JPasswordField jtfPassword;
-	public JLabel lblRegistryId;
-	public JLabel lblFname;
-	public JLabel lblLname;
-	public JLabel lblEmail;
-	public JLabel lblPhone;
-	public JLabel lblPassword;
-	public JButton btnAddRegistry;
+	private JPanel pnlAddRegistry;
+	private JTable tblRegistryList;
+	private JScrollPane scpRegistryList;
+	private DefaultTableModel mdlRegistryList;
+	private String[] registryCols;
+	private JTextField jtfRegistryId;
+	private JTextField jtfFname;
+	private JTextField jtfLname;
+	private JTextField jtfEmail;
+	private JTextField jtfPhone;
+	private JPasswordField jtfPassword;
+	private JLabel lblRegistryId;
+	private JLabel lblFname;
+	private JLabel lblLname;
+	private JLabel lblEmail;
+	private JLabel lblPhone;
+	private JLabel lblPassword;
+	private JButton btnAddRegistry;
 	
 	// Lecturer Components
-	public JPanel pnlManageLecturer;
-	public JPanel pnlAddLecturer;
-	public JPanel pnlAssignLecturer;
-	public JPanel pnlLecturerList;
-	public JTable tblLecturerList;
-	public JScrollPane scpLecturerList;
-	public DefaultTableModel mdlLecturerList;
-	public String[] lecturerCols;
-	public String[] lecturerNames;
-	public int[] lecturerIds;
-	public int[] courseCodes;
-	public String[] courseNames;
-	public JComboBox<String> jcbAssignLectNames;
-	public JComboBox<String> jcbAssignCourseNames;
-	public JComboBox<String> jcbAssignModuleNames;
-	public JLabel lblAssignLect;
-	public JLabel lblAssignCourse;
-	public JLabel lblAssignModule;
-	public JTextField jtfLectId;
-	public JTextField jtfLectFname;
-	public JTextField jtfLectLname;
-	public JTextField jtfLectEmail;
-	public JTextField jtfLectAddr;
-	public JTextField jtfLectPhone;
-	public JPasswordField jtfLectPassword;
-	public JLabel lblLectId;
-	public JLabel lblLectFname;
-	public JLabel lblLectLname;
-	public JLabel lblLectEmail;
-	public JLabel lblLectAddr;
-	public JLabel lblLectPhone;
-	public JLabel lblLectPassword;
-	public JButton btnAddLect;
-	public JButton btnAssignLect;
+	private JPanel pnlManageLecturer;
+	private JPanel pnlAddLecturer;
+	private JPanel pnlAssignLecturer;
+	private JTable tblLecturerList;
+	private JScrollPane scpLecturerList;
+	private DefaultTableModel mdlLecturerList;
+	private String[] lecturerCols;
+	private JComboBox<String> jcbAssignLectNames;
+	private JComboBox<String> jcbAssignCourseNames;
+	private JComboBox<String> jcbAssignModuleNames;
+	private JLabel lblAssignLect;
+	private JLabel lblAssignCourse;
+	private JLabel lblAssignModule;
+	private JTextField jtfLectId;
+	private JTextField jtfLectFname;
+	private JTextField jtfLectLname;
+	private JTextField jtfLectEmail;
+	private JTextField jtfLectAddr;
+	private JTextField jtfLectPhone;
+	private JPasswordField jtfLectPassword;
+	private JLabel lblLectId;
+	private JLabel lblLectFname;
+	private JLabel lblLectLname;
+	private JLabel lblLectEmail;
+	private JLabel lblLectAddr;
+	private JLabel lblLectPhone;
+	private JLabel lblLectPassword;
+	private JButton btnAddLect;
+	private JButton btnAssignLect;
 	
 	// Course Components
-	public JPanel pnlAddCourse;
-	public JPanel pnlCourseList;
-	public JTable tblCourseList;
-	public JScrollPane scpCourseList;
-	public DefaultTableModel mdlCourseList;
-	public String[] courseCols;
-	public JTextField jtfCourseCode;
-	public JTextField jtfCourseName;
-	public JTextField jtfModuleCode1;
-	public JTextField jtfModuleCode2;
-	public JTextField jtfModuleCode3;
-	public JTextField jtfModuleName1;
-	public JTextField jtfModuleName2;
-	public JTextField jtfModuleName3;
-	public JLabel lblCourseCode;
-	public JLabel lblCourseName;
-	public JLabel lblModuleCode;
-	public JLabel lblModuleName;
-	public JButton btnAddCourse;
+	private JPanel pnlAddCourse;
+	private JTable tblCourseList;
+	private JScrollPane scpCourseList;
+	private DefaultTableModel mdlCourseList;
+	private String[] courseCols;
+	private JTextField jtfCourseCode;
+	private JTextField jtfCourseName;
+	private JTextField jtfModuleCode1;
+	private JTextField jtfModuleCode2;
+	private JTextField jtfModuleCode3;
+	private JTextField jtfModuleName1;
+	private JTextField jtfModuleName2;
+	private JTextField jtfModuleName3;
+	private JLabel lblCourseCode;
+	private JLabel lblCourseName;
+	private JLabel lblModuleCode;
+	private JLabel lblModuleName;
+	private JButton btnAddCourse;
 	
 	// Attendance Components
-	public Box boxStudentAttendance;
-	public JPanel pnlSearchStudent;
-	public JTable[] tblStudentAttendanceModules = new JTable[3];
-	public JScrollPane[] scpStudentAttendanceModules = new JScrollPane[3];
-	public DefaultTableModel[] mdlStudentAttendanceModules = new DefaultTableModel[3];
-	public JLabel lblSearchStudent;
-	public JTextField jtfSearchStudent;
-	public Box boxModuleAttendanceList;
-	public JPanel pnlSearchOptions;
-	public Box boxBtnLoadReport;
-	public JTable tblModuleAttendanceList;
-	public JScrollPane scpModuleAttendanceList;
-	public DefaultTableModel mdlModuleAttendanceList;
-	public JComboBox<String> jcbSearchCourseNames;
-	public JComboBox<String> jcbSearchModuleNames;
-	public JLabel lblFrom;
-	public JLabel lblTo;
-	public JTextField jtfDateFrom;
-	public JTextField jtfDateTo;
-	public DatePick dateFrom;
-	public DatePick dateTo;
-	public JButton btnDateFrom;
-	public JButton btnDateTo;
-	public JButton btnSearchStudentAttendance;
-	public JButton btnSearchModuleAttendance;
-	public JButton btnLoadReport;
-	public JButton btnLoadDefaulterList;
+	private Box boxStudentAttendance;
+	private JPanel pnlSearchStudent;
+	private JTable[] tblStudentAttendanceModules = new JTable[3];
+	private JScrollPane[] scpStudentAttendanceModules = new JScrollPane[3];
+	private DefaultTableModel[] mdlStudentAttendanceModules = new DefaultTableModel[3];
+	private JLabel lblSearchStudent;
+	private JTextField jtfSearchStudent;
+	private Box boxModuleAttendanceList;
+	private JPanel pnlSearchOptions;
+	private Box boxBtnLoadReport;
+	private JTable tblModuleAttendanceList;
+	private JScrollPane scpModuleAttendanceList;
+	private DefaultTableModel mdlModuleAttendanceList;
+	private JComboBox<String> jcbSearchCourseNames;
+	private JComboBox<String> jcbSearchModuleNames;
+	private JLabel lblFrom;
+	private JLabel lblTo;
+	private JTextField jtfDateFrom;
+	private JTextField jtfDateTo;
+	private JButton btnDateFrom;
+	private JButton btnDateTo;
+	private JButton btnSearchStudentAttendance;
+	private JButton btnSearchModuleAttendance;
+	private JButton btnLoadReport;
+	private JButton btnLoadDefaulterList;
 	
 	public AdminWindow(Admin user, JFrame frame) {
 		super("Admin");
@@ -303,9 +291,9 @@ public class AdminWindow extends JFrame {
 		pnlMenu.add(pnlDate);
 
 		// Menu Items
-		btnsMenu[0] = btnRegistry = new JButton(REGISTRY);
-		btnsMenu[1] = btnLecturer = new JButton(LECTURER);
-		btnsMenu[2] = btnCourse = new JButton(COURSE);
+		btnsMenu[0] = new JButton(REGISTRY);
+		btnsMenu[1] = new JButton(LECTURER);
+		btnsMenu[2] = new JButton(COURSE);
 		btnsMenu[3] = btnAttendance = new JButton(ATTENDANCE);
 		btnsMenu[4] = btnLogout = new JButton(LOGOUT);
 
@@ -1084,6 +1072,14 @@ public class AdminWindow extends JFrame {
 					attendances = Attendance.readAttendance(admin.getUserConnection(), module);
 				}
 				
+				// If no attendance taken yet
+				if (attendances.isEmpty()) {
+					// Clear module attendance table
+					((DefaultTableModel) tblModuleAttendanceList.getModel()).setRowCount(0);
+					JOptionPane.showMessageDialog(null, "No attendance taken yet for module: " + moduleSelected);
+					return;
+				}
+				
 				lecturerId = attendances.get(0).getLecturerId();
 				
 				ArrayList<Boolean> presence;
@@ -1157,11 +1153,15 @@ public class AdminWindow extends JFrame {
 				}
 				
 				if ( !student.read(admin.getUserConnection(), searchById) ) { // Invalid id
+					// Clear module attendance tables
+					for (DefaultTableModel model : mdlStudentAttendanceModules) {
+						model.setRowCount(0);
+					}
 					JOptionPane.showMessageDialog(null,  "Student Not Found");
 					return;
 				}
 				
-				course = new Course(student.getCourseCode()); // Student enrolled course
+				course = new Course(student.getCourseCodeEnrolled()); // Student enrolled course
 				course.read(admin.getUserConnection()); // Get course modules
 				studentModules = course.getModules();
 								
@@ -1205,7 +1205,7 @@ public class AdminWindow extends JFrame {
 				}
 				
 				String message = "Excel Report Cannot be created.";
-				if ( admin.loadReport(moduleAttendancesColsData, studentIds, studentNames, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
+				if ( admin.loadReport(moduleAttendancesColsData, students, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
 					message = "Excel Report Created Successfully";
 				}
 				
@@ -1223,7 +1223,6 @@ public class AdminWindow extends JFrame {
 					JOptionPane.showMessageDialog(null, "Search Module Attendance First");
 					return;
 				}
-				
 				
 				String message = "Excel Report Cannot be created.";
 				if ( admin.loadDefaultersList(defaultersDateAbsentMap, defaultersIdNameMap, (String) jcbSearchModuleNames.getSelectedItem(), lecturerId) ) {
@@ -1249,7 +1248,7 @@ public class AdminWindow extends JFrame {
 	private void initializeJTextFieldAndComboBox(String command) {
 		switch (command) {
 			case REGISTRY:
-				jtfRegistryId.setText( Integer.toString( Registry.getNextAvailableUserId(admin.getUserConnection()) ) );
+				jtfRegistryId.setText( Integer.toString( Registry.getNextAvailableRegistryId(admin.getUserConnection()) ) );
 				
 				jtfFname.setText("");
 				jtfLname.setText("");
@@ -1323,6 +1322,8 @@ public class AdminWindow extends JFrame {
 				
 				mdlCourseModuleNames = new DefaultComboBoxModel<>( courseModulesMap.get( (String) jcbSearchCourseNames.getItemAt(0) ) );
 				jcbSearchModuleNames.setModel(mdlCourseModuleNames);
+				
+				((DefaultTableModel) tblModuleAttendanceList.getModel()).setRowCount(0);
 
 				break;	
 				

@@ -11,6 +11,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
@@ -67,13 +69,6 @@ public class Admin extends User {
 		return l.update(this.conn);
 	}
 	
-	public boolean assignModuleToLecturer(Lecturer l, int moduleCode) {
-		
-		if (l.teaches(moduleCode)) return false;
-		
-		return l.assignModule(this.conn, moduleCode);
-	}
-	
 	public boolean addCourse(Course c) {
 		return c.add(this.conn);
 	}
@@ -82,8 +77,21 @@ public class Admin extends User {
 		return c.update(this.conn);
 	}
 	
-	public boolean loadReport(Map<LocalDate, ArrayList<Boolean>> attendances, ArrayList<Integer> studentIds, ArrayList<String> studentNames, String moduleName, int lecturerId) {
+	public boolean assignModuleToLecturer(Lecturer l, int moduleCode) {
+		
+		if (l.teaches(moduleCode)) return false;
+		
+		return l.assignModule(this.conn, moduleCode);
+	}
+	
+	
+	public boolean loadReport(Map<LocalDate, ArrayList<Boolean>> attendances, ArrayList<TableObjectInterface> students,  String moduleName, int lecturerId) {
 		// Reference: https://www.baeldung.com/java-microsoft-excel
+		
+		if (attendances.isEmpty()) {
+			JOptionPane.showMessageDialog(null, "No Defaulters in module: " + moduleName);
+			return false;
+		}
 		
 		String excelSheetName = String.format("%s-lecturerId<%d>#%s", moduleName, lecturerId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		
@@ -108,38 +116,31 @@ public class Admin extends User {
 		CellStyle style = workbook.createCellStyle();
 		style.setWrapText(true);
 
-		// Populate StudentId column
+		// Populate StudentId and StudentName column
 		headerCell = header.createCell(0);
 		headerCell.setCellValue("studentId");
 		headerCell.setCellStyle(headerStyle);
 		sheet.setColumnWidth(0, 4000);
-
-		int rowNumber = 1;
-		int colNumber = 0;
-		for (int studentId : studentIds) {
-			row = sheet.createRow(rowNumber++);
-			cell = row.createCell(colNumber);
-			cell.setCellValue(studentId);
-			cell.setCellStyle(style);
-		}
 		
-		// Populate StudentName column
 		headerCell = header.createCell(1);
 		headerCell.setCellValue("studentName");
 		headerCell.setCellStyle(headerStyle);
 		sheet.setColumnWidth(1, 6000);
 
-		rowNumber = 1;
-		colNumber++;
-		for (String studentName : studentNames) {
-			row = sheet.getRow(rowNumber++);
-			cell = row.createCell(colNumber);
-			cell.setCellValue(studentName);
+		int rowNumber = 1;
+		for (TableObjectInterface student : students) {
+			row = sheet.createRow(rowNumber++);
+			cell = row.createCell(0);
+			cell.setCellValue( ((Student) student).getStudentId() );
+			cell.setCellStyle(style);
+			
+			cell = row.createCell(1);
+			cell.setCellValue( ((Student) student).getStudentName() );
 			cell.setCellStyle(style);
 		}
 		
 		// Populate Attendances columns
-		colNumber++;
+		int colNumber = 2;
 		for (Map.Entry<LocalDate, ArrayList<Boolean>> entry : attendances.entrySet()) {
 			// Set attendance date
 			headerCell = header.createCell(colNumber);
@@ -147,7 +148,7 @@ public class Admin extends User {
 			headerCell.setCellStyle(headerStyle);
 			sheet.setColumnWidth(colNumber, 6000);
 			
-			// Set column date
+			// Set presence for all students for attendance date
 			rowNumber = 1;
 			for (boolean presence : entry.getValue()) {
 				row = sheet.getRow(rowNumber++);
@@ -175,6 +176,11 @@ public class Admin extends User {
 	
 	public boolean loadDefaultersList(Map<Integer, ArrayList<LocalDate>> defaulterDatesAbsentMap, Map<Integer, String> defaulterIdNameMap, String moduleName, int lecturerId) {
 		// Reference: https://www.baeldung.com/java-microsoft-excel
+		
+		if (defaulterDatesAbsentMap.isEmpty()) {
+			JOptionPane.showMessageDialog(null, "No Defaulters in module: " + moduleName);
+			return false;
+		}
 		
 		String excelSheetName = String.format("Defaulters-%s-lecturerId<%d>#%s", moduleName, lecturerId, LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
 		

@@ -52,7 +52,7 @@ public class Student implements TableObjectInterface {
 		return fname + " " + lname;
 	}
 	
-	public int getCourseCode() {
+	public int getCourseCodeEnrolled() {
 		return courseCode;
 	}
 	
