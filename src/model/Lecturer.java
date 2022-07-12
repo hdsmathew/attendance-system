@@ -58,7 +58,7 @@ public class Lecturer extends User implements TableObjectInterface {
 		if (conn == null) return false;
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lecturer WHERE lectID = ?;");
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lecturer WHERE lectID = ? AND teachingStatus = 1;");
 			stmt.setInt(1, super.userId);
 			ResultSet rs = stmt.executeQuery();
 			
@@ -82,6 +82,10 @@ public class Lecturer extends User implements TableObjectInterface {
 		return fname + " " + lname;
 	}
 	
+	public ArrayList<CourseModule> getModulesTaught() {
+		return modulesTaught;
+	}
+	
 	public boolean isActive() {
 		return teachingStatus.equalsIgnoreCase("active");
 	}
@@ -93,10 +97,11 @@ public class Lecturer extends User implements TableObjectInterface {
 		
 		return false;
 	}
-
-	@Override
-	public Object[] getObjectInfo() {
-		return new Object[] {super.userId, fname, lname, email, address, phoneNo, teachingStatus};
+	
+	public void takeAttendance(ArrayList<Attendance> attendances) {
+		for (Attendance a : attendances) {
+			a.add(this.conn);
+		}
 	}
 	
 	public boolean assignModule(Connection conn, int moduleCode) {
@@ -113,14 +118,20 @@ public class Lecturer extends User implements TableObjectInterface {
 			return false;
 		}
 	}
+
+	@Override
+	public Object[] getObjectInfo() {
+		return new Object[] {super.userId, fname, lname, email, address, phoneNo, teachingStatus};
+	}
 	
 	public boolean read(Connection conn) {
 		
 		try {
-			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lecturer l INNER JOIN teach t ON l.lectID = t.lectID WHERE l.lectID = ?;");
+			PreparedStatement stmt = conn.prepareStatement("SELECT * FROM lecturer l INNER JOIN teach t ON l.lectID = t.lectID INNER JOIN module m ON t.moduleCode = m.moduleCode INNER JOIN course c ON c.courseCode = m.courseCode WHERE l.lectID = ? AND c.onOffer = 1;");
 			stmt.setInt(1, super.userId);
 			ResultSet rs = stmt.executeQuery();
 			
+			this.modulesTaught = new ArrayList<>();
 			if (rs.next()) {
 				this.fname = rs.getString("fname");
 				this.lname = rs.getString("lname");
@@ -129,10 +140,10 @@ public class Lecturer extends User implements TableObjectInterface {
 				this.phoneNo = rs.getInt("phoneNo");
 				this.teachingStatus = (rs.getInt("teachingStatus") == 1) ? "Active" : "Not Active";
 				
-				modulesTaught.add( new CourseModule( rs.getInt("moduleCode")) );
+				this.modulesTaught.add( new CourseModule( rs.getInt("moduleCode"), rs.getString("moduleName") ) );
 				
 				while (rs.next()) {
-					modulesTaught.add( new CourseModule( rs.getInt("moduleCode")) );
+					this.modulesTaught.add( new CourseModule( rs.getInt("moduleCode"), rs.getString("moduleName") ) );
 				}
 				
 				return true;
